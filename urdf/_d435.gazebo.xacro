@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 
 <!--
-Aknolegment: This file was originally copied from the realsense repository of
+Acknolegment: This file was originally copied from the realsense repository of
 pal-robotics-forks( https://github.com/pal-robotics-forks/realsense/ )
 and then modified.
 
 License: Apache 2.0. See LICENSE file in root directory.
 Copyright(c) 2017 PAL Robotics, S.L. All Rights Reserved
 
-This is the Gazebo URDF model for the Intel RealSense D435 camera
+This is the Gazebo URDF model for the Intel RealSense D435/D435i camera
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
@@ -21,6 +21,13 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                                           color_optical_frame
                                           infrared1_optical_frame
                                           infrared2_optical_frame
+                                          accel_optical_frame
+                                          gyro_optical_frame
+
+                                          has_imu:=false
+                                          unite_imu_method:=false
+                                          accel_fps:=250
+                                          gyro_fps:=400
 
                                           clip_distance:=-1.0
                                           depth_width:=1280
@@ -163,6 +170,59 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         </xacro:if>
         <visualize>false</visualize>
       </sensor>
+      <xacro:if value="${has_imu}">
+        <!-- IMU -->
+        <xacro:if value="${unite_imu_method == 'copy' or unite_imu_method == 'linear_interpolation'}">
+          <sensor name="${camera_name}imu" type="imu">
+            <always_on>true</always_on>
+            <update_rate>${gyro_fps}</update_rate>
+            <topic>${camera_name}/imu/sample</topic>
+            <plugin name="${camera_name}imu" filename="libgazebo_ros_imu_sensor.so">
+              <topicName>${camera_name}/imu/sample</topicName>
+              <bodyName>${camera_name}_link</bodyName>
+              <frameName>${gyro_optical_frame}</frameName>
+              <updateRateHZ>${gyro_fps}</updateRateHZ>
+              <gaussianNoise>0.1</gaussianNoise>
+              <xyzOffset>0 0 0</xyzOffset>
+              <rpyOffset>0 0 0</rpyOffset>
+            </plugin>
+          </sensor>
+        </xacro:if>
+        <!-- Accel and gyro -->
+        <xacro:unless value="${unite_imu_method == 'copy' or unite_imu_method == 'linear_interpolation'}">
+          <sensor name="${camera_name}accel" type="imu">
+            <always_on>true</always_on>
+            <update_rate>${accel_fps}</update_rate>
+            <topic>${camera_name}/accel/sample</topic>
+            <plugin name="${topics_ns}_accel_plugin" filename="librealsense_gazebo_accel_sensor.so">
+              <topicName>${camera_name}/accel/sample</topicName>
+              <bodyName>${camera_name}_link</bodyName>
+              <updateRateHZ>${accel_fps}</updateRateHZ>
+              <gaussianNoise>0.1</gaussianNoise>
+              <xyzOffset>0 0 0</xyzOffset>
+              <rpyOffset>0 0 0</rpyOffset>
+              <frameName>${accel_optical_frame}</frameName>
+              <initialOrientationAsReference>false</initialOrientationAsReference>
+            </plugin>
+            <pose>0 0 0 0 0 0</pose>
+          </sensor>
+          <sensor name="${camera_name}gyro" type="imu">
+            <always_on>true</always_on>
+            <update_rate>${gyro_fps}</update_rate>
+            <topic>${camera_name}/gyro/sample</topic>
+            <plugin name="${topics_ns}_gyro_plugin" filename="librealsense_gazebo_gyro_sensor.so">
+              <topicName>${camera_name}/gyro/sample</topicName>
+              <bodyName>${camera_name}_link</bodyName>
+              <updateRateHZ>${gyro_fps}</updateRateHZ>
+              <gaussianNoise>0.1</gaussianNoise>
+              <xyzOffset>0 0 0</xyzOffset>
+              <rpyOffset>0 0 0</rpyOffset>
+              <frameName>${gyro_optical_frame}</frameName>
+              <initialOrientationAsReference>false</initialOrientationAsReference>
+            </plugin>
+          </sensor>
+        </xacro:unless>
+      </xacro:if>
     </gazebo>
 
     <gazebo>
