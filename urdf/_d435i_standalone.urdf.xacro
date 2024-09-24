@@ -13,11 +13,13 @@
     <xacro:arg name="yaw" default="0"/>
     
     <xacro:arg name="enable_pointCloud" default="false"/>
+    <xacro:arg name="align_depth" default="false"/>
     
 	<xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.urdf.xacro"/>
 	
  	<link name="$(arg parent)"/>
-	<xacro:sensor_d435i parent="$(arg parent)" name="$(arg name)" topics_ns="$(arg name)" enable_pointCloud="$(arg enable_pointcloud)">
+	<xacro:sensor_d435i parent="$(arg parent)" name="$(arg name)" topics_ns="$(arg name)" 
+        enable_pointCloud="$(arg enable_pointcloud)" align_depth="$(arg align_depth)">
 		<origin xyz="$(arg x) $(arg y) $(arg z)" rpy="$(arg roll) $(arg pitch) $(arg yaw)"/>
 	</xacro:sensor_d435i>
 	

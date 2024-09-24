@@ -17,6 +17,7 @@
     <arg name="spawn_pitch" default="0" />
     <arg name="spawn_yaw" default="0" />
     <arg name="enable_pointcloud" default="false" />
+    <arg name="align_depth" default="false" />
     <arg name="pub_tf" default="true"/>
     <arg name="pub_world_tf" default="true" />
     <arg name="spawn_gazebo" default="true"/>
@@ -33,6 +34,7 @@
          pitch:=$(arg pose_pitch)
          yaw:=$(arg pose_yaw)
          enable_pointcloud:=$(arg enable_pointcloud)
+         align_depth:=$(arg align_depth)
          "
     />
     <param name="gazebo/$(arg name)_description" command="$(find xacro)/xacro $(arg xacroD435)" />
