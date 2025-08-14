@@ -24,7 +24,7 @@
     <arg name="waitFor" default="" doc="Name of another model to wait. Option to wait for another model to be spawned first (eg a table on which the cam must stay on)" />
     
 
-    <arg name="xacroD435" value="$(find realsense_gazebo_description)/urdf/_d435i_standalone.urdf.xacro
+    <arg name="xacroD435" value="$(find realsense_gazebo_description)/urdf/d435i_standalone.urdf.xacro
          name:=$(arg name)
          parent:=$(arg parent)
          x:=$(arg pose_x)

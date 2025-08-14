@@ -12,7 +12,7 @@
     <xacro:arg name="pitch" default="0"/>
     <xacro:arg name="yaw" default="0"/>
     
-    <xacro:arg name="enable_pointCloud" default="false"/>
+    <xacro:arg name="enable_pointcloud" default="false"/>
     <xacro:arg name="align_depth" default="false"/>
     
 	<xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.urdf.xacro"/>
