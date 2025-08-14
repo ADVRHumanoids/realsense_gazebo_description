@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="sensor_d435_gazebo_config">
+
+<!-- Actually confid file not in use to not disrupt all the macros
+ that all the various robot are using. But kept for reference for different res/parameters -->
+<!-- Taken from real camera, official realsenselib for ros Noetic -->
+
+<xacro:arg name="color_res" default="640x480"/>
+<xacro:property name="COLOR_RES" value="$(arg color_res)" />
+<xacro:arg name="depth_res" default="848x480"/>
+<xacro:property name="DEPTH_RES" value="$(arg depth_res)" />
+<xacro:arg name="infra_res" default="640x480"/>
+<xacro:property name="INFRA_RES" value="$(arg infra_res)" />
+
+<xacro:if value="${COLOR_RES == '640x480'}">
+  <xacro:property name="color_width" value="640"/>
+  <xacro:property name="color_height" value="480"/>
+  <xacro:property name="color_fps" value="30"/>
+  <xacro:property name="color_fx" value="606.4806518554688"/>
+  <xacro:property name="color_fy" value="606.4366455078125"/>
+  <xacro:property name="color_cx" value="326.2506103515625"/>
+  <xacro:property name="color_cy" value="254.5507049560547"/>
+</xacro:if>
+<xacro:if value="${COLOR_RES == '1280x720'}">
+  <xacro:property name="color_width" value="1280"/>
+  <xacro:property name="color_height" value="720"/>
+  <xacro:property name="color_fps" value="30"/>
+  <xacro:property name="color_fx" value="909.7210083007812"/>
+  <xacro:property name="color_fy" value="909.655029296875"/>
+  <xacro:property name="color_cx" value="649.3759155273438"/>
+  <xacro:property name="color_cy" value="381.8260498046875"/>
+</xacro:if>
+<xacro:if value="${COLOR_RES == '1920x1080'}">
+  <xacro:property name="color_width" value="1920"/>
+  <xacro:property name="color_height" value="1080"/>
+  <xacro:property name="color_fps" value="30"/>
+  <xacro:property name="color_fx" value="1364.58154296875"/>
+  <xacro:property name="color_fy" value="1364.4825439453125"/>
+  <xacro:property name="color_cx" value="974.0638427734375"/>
+  <xacro:property name="color_cy" value="572.7390747070312"/>
+</xacro:if>
+
+
+<xacro:if value="${DEPTH_RES == '848x480'}">
+  <xacro:property name="depth_width" value="848"/>
+  <xacro:property name="depth_height" value="480"/>
+  <xacro:property name="depth_fps" value="30"/>
+  <xacro:property name="depth_fx" value="431.2745666503906"/>
+  <xacro:property name="depth_fy" value="431.2745666503906"/>
+  <xacro:property name="depth_cx" value="423.82025146484375"/>
+  <xacro:property name="depth_cy" value="241.2349395751953"/>
+</xacro:if>
+
+
+<xacro:if value="${INFRA_RES == '640x480'}">
+  <xacro:property name="infra_width" value="640"/>
+  <xacro:property name="infra_height" value="480"/>
+  <xacro:property name="infra_fps" value="30"/>
+  <xacro:property name="infra_fx" value="431.2745666503906"/>
+  <xacro:property name="infra_fy" value="431.2745666503906"/>
+  <xacro:property name="infra_cx" value="423.82025146484375"/>
+  <xacro:property name="infra_cy" value="241.2349395751953"/>
+  <xacro:property name="infra2_tx" value="-21.57023811340332"/>
+</xacro:if>
+</robot>

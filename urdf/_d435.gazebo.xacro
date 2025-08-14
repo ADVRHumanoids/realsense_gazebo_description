@@ -23,17 +23,30 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                                           infrared2_optical_frame
 
                                           clip_distance:=-1.0
-                                          depth_width:=1280
-                                          depth_height:=720
+                                          depth_width:=848
+                                          depth_height:=480
                                           depth_fps:=30
-
-                                          color_width:=1920
-                                          color_height:=1080
-                                          color_fps:=30
+                                          depth_fx:= 431.2745666503906
+                                          depth_fy:= 431.2745666503906
+                                          depth_cx:= 423.82025146484375
+                                          depth_cy:= 241.2349395751953 
 
                                           infra_width:=640
                                           infra_height:=480
                                           infra_fps:=30
+                                          infra_fx:= 431.2745666503906
+                                          infra_fy:= 431.2745666503906
+                                          infra_cx:= 423.82025146484375
+                                          infra_cy:= 241.2349395751953
+                                          infra2_tx:= -21.57023811340332
+
+                                          color_width:=640
+                                          color_height:=480
+                                          color_fps:=30
+                                          color_fx:= 606.4806518554688
+                                          color_fy:= 606.4366455078125
+                                          color_cx:= 326.2506103515625
+                                          color_cy:= 254.5507049560547 
 
                                           align_depth:=false
                                           enable_pointCloud:=false
@@ -73,6 +86,23 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <mean>0.0</mean>
             <stddev>0.007</stddev>
           </noise>
+          <lens>
+            <projection>
+              <p_fx>${color_fx}</p_fx>
+              <p_fy>${color_fy}</p_fy>
+              <p_cx>${color_cx}</p_cx>
+              <p_cy>${color_cy}</p_cy>
+              <tx>0</tx>
+              <ty>0</ty>
+            </projection>
+            <intrinsics>
+              <fx>${color_fx}</fx>
+              <fy>${color_fy}</fy>
+              <cx>${color_cx}</cx>
+              <cy>${color_cy}</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
         </camera>
         <always_on>1</always_on>
         <update_rate>${color_fps}</update_rate>
@@ -95,6 +125,23 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <mean>0.0</mean>
             <stddev>0.05</stddev>
           </noise>
+          <lens>
+            <projection>
+              <p_fx>${infra_fx}</p_fx>
+              <p_fy>${infra_fy}</p_fy>
+              <p_cx>${infra_cx}</p_cx>
+              <p_cy>${infra_cy}</p_cy>
+              <tx>0</tx>
+              <ty>0</ty>
+            </projection>
+            <intrinsics>
+              <fx>${infra_fx}</fx>
+              <fy>${infra_fy}</fy>
+              <cx>${infra_cx}</cx>
+              <cy>${infra_cy}</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
         </camera>
         <always_on>1</always_on>
         <update_rate>${infra_fps}</update_rate>
@@ -117,6 +164,23 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <mean>0.0</mean>
             <stddev>0.05</stddev>
           </noise>
+          <lens>
+            <projection>
+              <p_fx>${infra_fx}</p_fx>
+              <p_fy>${infra_fy}</p_fy>
+              <p_cx>${infra_cx}</p_cx>
+              <p_cy>${infra_cy}</p_cy>
+              <tx>${infra2_tx}</tx>
+              <ty>0</ty>
+            </projection>
+            <intrinsics>
+              <fx>${infra_fx}</fx>
+              <fy>${infra_fy}</fy>
+              <cx>${infra_cx}</cx>
+              <cy>${infra_cy}</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
         </camera>
         <always_on>1</always_on>
         <update_rate>${infra_fps}</update_rate>
@@ -153,6 +217,23 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <mean>0.0</mean>
             <stddev>0.100</stddev>
           </noise>
+          <lens>
+            <projection>
+              <p_fx>${depth_fx}</p_fx>
+              <p_fy>${depth_fy}</p_fy>
+              <p_cx>${depth_cx}</p_cx>
+              <p_cy>${depth_cy}</p_cy>
+              <tx>0</tx>
+              <ty>0</ty>
+            </projection>
+            <intrinsics>
+              <fx>${depth_fx}</fx>
+              <fy>${depth_fy}</fy>
+              <cx>${depth_cx}</cx>
+              <cy>${depth_cy}</cy>
+              <s>0</s>
+            </intrinsics>
+          </lens>
         </camera>
         <always_on>1</always_on>
         <xacro:unless value="${align_depth}">

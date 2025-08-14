@@ -28,17 +28,30 @@ aluminum peripherial evaluation case.
                                           gyro_fps:=400
 
                                           clip_distance:=-1.0
-                                          depth_width:=1280
-                                          depth_height:=720
+                                          depth_width:=848
+                                          depth_height:=480
                                           depth_fps:=30
+                                          depth_fx:= 431.2745666503906
+                                          depth_fy:= 431.2745666503906
+                                          depth_cx:= 423.82025146484375
+                                          depth_cy:= 241.2349395751953 
 
                                           infra_width:=640
                                           infra_height:=480
                                           infra_fps:=30
+                                          infra_fx:= 431.2745666503906
+                                          infra_fy:= 431.2745666503906
+                                          infra_cx:= 423.82025146484375
+                                          infra_cy:= 241.2349395751953
+                                          infra2_tx:= -21.57023811340332
 
-                                          color_width:=1920
-                                          color_height:=1080
+                                          color_width:=640
+                                          color_height:=480
                                           color_fps:=30
+                                          color_fx:= 606.4806518554688
+                                          color_fy:= 606.4366455078125
+                                          color_cx:= 326.2506103515625
+                                          color_cy:= 254.5507049560547   
 
                                           *origin">
     <xacro:property name="M_PI" value="3.1415926535897931"/>
@@ -205,17 +218,30 @@ aluminum peripherial evaluation case.
                         depth_width="${depth_width}"
                         depth_height="${depth_height}"
                         depth_fps="${depth_fps}"
+                        depth_fx="${depth_fx}"
+                        depth_fy="${depth_fy}"
+                        depth_cx="${depth_cx}"
+                        depth_cy="${depth_cy}"
 
                         color_optical_frame="${name}_color_optical_frame"
                         color_width="${color_width}"
                         color_height="${color_height}"
                         color_fps="${color_fps}"
+                        color_fx="${color_fx}"
+                        color_fy="${color_fy}"
+                        color_cx="${color_cx}"
+                        color_cy="${color_cy}"
 
                         infrared1_optical_frame="${name}_left_ir_optical_frame"
                         infrared2_optical_frame="${name}_right_ir_optical_frame"
                         infra_width="${infra_width}"
                         infra_height="${infra_height}"
                         infra_fps="${infra_fps}"
+                        infra_fx="${infra_fx}"
+                        infra_fy="${infra_fy}"
+                        infra_cx="${infra_cx}"
+                        infra_cy="${infra_cy}"
+                        infra2_tx="${infra2_tx}"
 
                         accel_optical_frame="${name}_accel_optical_frame"
                         gyro_optical_frame="${name}_gyro_optical_frame"

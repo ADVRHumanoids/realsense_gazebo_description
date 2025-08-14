@@ -35,3 +35,6 @@ In the xacro file where you want to use the simulated cameras add the following 
 - When using a single camera, ```name``` and ```topic_ns``` can be removed. They will default to ```camera```.
 - For multi-camera simulations, ```name``` and ```topic_ns``` are required to avoid errors due to conflicting names. Multiple istances of the same camera can be used used if they are given different ```name``` and ```topic_ns```.
 - As described in the offical [IntelRealSense/realsense-ros/README.md](https://github.com/IntelRealSense/realsense-ros/blob/development/README.md) when the param ```align_depth``` is set true, the topics ```/camera/aligned_depth_to_color/image_raw``` and ```/camera/aligned_depth_to_color/camera_info``` are added. However, to lighten the simulation (differently for the real camera), the topics ```/camera/depth/image_rect_raw``` and ```/camera/depth/camera_info``` are removed when this happens.
+
+### Notes 2025
+- Last commit solve the bug of simulated camera instrisic (for D cameras) different from the real one. Now, if you change the default resolution with the macro args, you must also pass the intrinsic according to the chosen resolution. Check d435_gazebo_config.xacro for some values already taken from real camera.
