@@ -47,7 +47,7 @@ aluminum peripherial evaluation case.
                                           color_fy:= 606.4366455078125
                                           color_cx:= 326.2506103515625
                                           color_cy:= 254.5507049560547  
-
+                                          visualize:=false
                                           *origin">
     <xacro:property name="M_PI" value="3.1415926535897931"/>
 
