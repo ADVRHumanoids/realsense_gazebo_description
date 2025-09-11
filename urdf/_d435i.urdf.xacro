@@ -19,7 +19,6 @@ aluminum peripherial evaluation case.
   <xacro:macro name="sensor_d435i" params="parent
                                           name:=camera
                                           topics_ns:=camera
-                                          visualize:=false
                                           align_depth:=false
                                           enable_pointCloud:=false
 
