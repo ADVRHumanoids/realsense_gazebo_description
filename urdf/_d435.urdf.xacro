@@ -23,6 +23,7 @@ aluminum peripherial evaluation case.
                                           enable_pointCloud:=false
 
                                           clip_distance:=-1.0
+                                          clip_distance_min:=0.195
                                           depth_width:=848
                                           depth_height:=480
                                           depth_fps:=30
@@ -210,6 +211,7 @@ aluminum peripherial evaluation case.
 
                         enable_pointCloud="${enable_pointCloud}"
                         clip_distance="${clip_distance}"
+                        clip_distance_min="${clip_distance_min}"
                         align_depth="${align_depth}"
                         visualize="${visualize}"
     />

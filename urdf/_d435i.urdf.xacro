@@ -28,6 +28,7 @@ aluminum peripherial evaluation case.
                                           gyro_fps:=400
 
                                           clip_distance:=-1.0
+                                          clip_distance_min:=0.195
                                           depth_width:=848
                                           depth_height:=480
                                           depth_fps:=30
@@ -251,6 +252,7 @@ aluminum peripherial evaluation case.
                         enable_pointCloud="${enable_pointCloud}"
                         unite_imu_method="${unite_imu_method}"
                         clip_distance="${clip_distance}"
+                        clip_distance_min="${clip_distance_min}"
                         align_depth="${align_depth}"
                         visualize="${visualize}"
     />

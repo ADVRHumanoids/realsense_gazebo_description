@@ -33,6 +33,7 @@ This is the Gazebo URDF model for the Intel RealSense D435i camera
                                             gyro_fps:=400
 
                                             clip_distance:=-1.0
+                                            clip_distance_min:=0.195
                                             depth_width:=848
                                             depth_height:=480
                                             depth_fps:=30
@@ -210,9 +211,9 @@ This is the Gazebo URDF model for the Intel RealSense D435i camera
             </image>
           </xacro:if>
           <clip>
-            <near>0.1</near>
+            <near>${clip_distance_min}</near>
             <xacro:unless value="${clip_distance > 0.0}">
-              <far>100</far>
+              <far>10</far>
             </xacro:unless>
             <xacro:if value="${clip_distance > 0.0}">
               <far>${clip_distance}</far>
@@ -224,21 +225,40 @@ This is the Gazebo URDF model for the Intel RealSense D435i camera
             <stddev>0.100</stddev>
           </noise>
           <lens>
-            <projection>
-              <p_fx>${depth_fx}</p_fx>
-              <p_fy>${depth_fy}</p_fy>
-              <p_cx>${depth_cx}</p_cx>
-              <p_cy>${depth_cy}</p_cy>
-              <tx>0</tx>
-              <ty>0</ty>
-            </projection>
-            <intrinsics>
-              <fx>${depth_fx}</fx>
-              <fy>${depth_fy}</fy>
-              <cx>${depth_cx}</cx>
-              <cy>${depth_cy}</cy>
-              <s>0</s>
-            </intrinsics>
+            <xacro:unless value="${align_depth}">
+              <projection>
+                <p_fx>${depth_fx}</p_fx>
+                <p_fy>${depth_fy}</p_fy>
+                <p_cx>${depth_cx}</p_cx>
+                <p_cy>${depth_cy}</p_cy>
+                <tx>0</tx>
+                <ty>0</ty>
+              </projection>
+              <intrinsics>
+                <fx>${depth_fx}</fx>
+                <fy>${depth_fy}</fy>
+                <cx>${depth_cx}</cx>
+                <cy>${depth_cy}</cy>
+                <s>0</s>
+              </intrinsics>
+            </xacro:unless>
+            <xacro:if value="${align_depth}">
+              <projection>
+                <p_fx>${color_fx}</p_fx>
+                <p_fy>${color_fy}</p_fy>
+                <p_cx>${color_cx}</p_cx>
+                <p_cy>${color_cy}</p_cy>
+                <tx>0</tx>
+                <ty>0</ty>
+              </projection>
+              <intrinsics>
+                <fx>${color_fx}</fx>
+                <fy>${color_fy}</fy>
+                <cx>${color_cx}</cx>
+                <cy>${color_cy}</cy>
+                <s>0</s>
+              </intrinsics>
+            </xacro:if>
           </lens>
         </camera>
         <always_on>1</always_on>
@@ -323,7 +343,7 @@ This is the Gazebo URDF model for the Intel RealSense D435i camera
       	<infrared2OpticalframeName>${infrared2_optical_frame}</infrared2OpticalframeName>
 
         <!-- Depth camera settings -->
-      	<rangeMinDepth>0.2</rangeMinDepth>
+      	<rangeMinDepth>${clip_distance_min}</rangeMinDepth>
         <xacro:unless value="${clip_distance > 0.0}">
       	  <rangeMaxDepth>10.0</rangeMaxDepth>
         </xacro:unless>
