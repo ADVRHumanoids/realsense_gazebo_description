@@ -1,40 +1,16 @@
 # realsense_gazebo_description
 
-This ROS package contains the models to simulate in Gazebo the Intel Realsense D435, D435i and T265 camera.
-To function properly it require the gazebo plugins found in [m-tartari/realsense_gazebo_plugin](https://github.com/m-tartari/realsense_gazebo_plugin).
+Check also the ROS1 branch for other info on that readme
 
-## Use
+## Instruction
+To be used with https://github.com/ADVRHumanoids/realsense_gazebo_plugin, picking the correct ROS2 branch
 
-In the xacro file where you want to use the simulated cameras add the following code (replace the content of ```parent```, ```name```, ```topics_ns```, and ```origin```  with you are using).
-```xml
-  <!-- d435  frame definition can be found at https://github.com/IntelRealSense/librealsense/blob/master/doc/d435i.md -->
-  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435.urdf.xacro"/>
-  <xacro:sensor_d435  parent="base_link" name="D435_camera" topics_ns="D435_camera" >
-    <origin xyz="0.0 -0.5 0.1" rpy="0.0 0.0 0.0"/>
-  </xacro:sensor_d435>
+## Info
+ROS2 version of the realsense cameras (models). Taken copying and modifing:
+- official realsense repo (https://github.com/IntelRealSense/realsense-ros/tree/ros2-master/realsense2_description), which does not include the "plugin tag" in the xacro for gazebo
+- pal fork of the official realsense repo, which includes the "plugin tag" (but not the gazebo macro) https://github.com/pal-robotics-forks/realsense/tree/alum-devel/realsense2_description
+- pal repo for realsense macro for gazebo, https://github.com/pal-robotics/realsense_simulation/tree/alum-devel. 
 
-  <!-- d435i frame definition can be found at https://github.com/IntelRealSense/librealsense/blob/master/doc/d435i.md -->
-  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.urdf.xacro"/>
-  <xacro:sensor_d435i parent="base_link" name="D435i_camera" topics_ns="D435i_camera"> 
-    <origin xyz="0.0 0.5 0.1" rpy="0.0 0.0 0.0"/>
-  </xacro:sensor_d435i>
+**Note** Recently https://github.com/pal-robotics/realsense_simulation/tree/alum-devel is marked as deprecated, in favour of https://github.com/pal-robotics/pal_urdf_utils. This one does not use anymore the custom PAL plugin for simulating the camera in gazebo, but the standard official ROS2: gazebo_ros_camera. Should we use this as well?
 
-  <!-- t265  frame definition can be found at https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
-  odom_xyz and odom_rpy paramenters are used as a base for odometry, they represent the traspformation from the robot base_link -->
-  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_t265.urdf.xacro"/>
-  <xacro:sensor_t265  parent="base_link" name="T265_camera" topics_ns="T265_camera"
-                      odom_xyz="0.0 0.0 0.25" odom_rpy="0.0 0.0 0.0">
-    <origin xyz="0.0 0.0 0.25" rpy="0.0 0.0 0.0"/>
-  </xacro:sensor_t265>
-```
-
-### Notes
-
-- You can launch an example on Gazebo using: ```roslaunch realsense_gazebo_description multicamera.launch```.
-- For a full list of the optional params and their default values you can look at [multicamera_params.urdf.xacro](https://github.com/m-tartari/realsense_gazebo_description/blob/master/urdf/multicamera_params.urdf.xacro).
-- When using a single camera, ```name``` and ```topic_ns``` can be removed. They will default to ```camera```.
-- For multi-camera simulations, ```name``` and ```topic_ns``` are required to avoid errors due to conflicting names. Multiple istances of the same camera can be used used if they are given different ```name``` and ```topic_ns```.
-- As described in the offical [IntelRealSense/realsense-ros/README.md](https://github.com/IntelRealSense/realsense-ros/blob/development/README.md) when the param ```align_depth``` is set true, the topics ```/camera/aligned_depth_to_color/image_raw``` and ```/camera/aligned_depth_to_color/camera_info``` are added. However, to lighten the simulation (differently for the real camera), the topics ```/camera/depth/image_rect_raw``` and ```/camera/depth/camera_info``` are removed when this happens.
-
-### Notes 2025
-- Last commit solve the bug of simulated camera instrisic (for D cameras) different from the real one. Now, if you change the default resolution with the macro args, you must also pass the intrinsic according to the chosen resolution. Check d435_gazebo_config.xacro for some values already taken from real camera.
+**Note2** Valerio work alternative? of this package: https://github.com/ADVRHumanoids/Depth_d435_ROS2_Gazebo_Ign

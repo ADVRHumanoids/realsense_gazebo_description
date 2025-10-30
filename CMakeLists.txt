@@ -1,56 +1,28 @@
-cmake_minimum_required(VERSION 2.8.3)
+# Copyright 2023 Intel Corporation. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cmake_minimum_required(VERSION 3.5)
 project(realsense_gazebo_description)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    gazebo_ros
-    sensor_msgs
-    image_transport
-    camera_info_manager
-    realsense_gazebo_plugin
-    realsense2_description
-)
-find_package(gazebo REQUIRED)
+find_package(ament_cmake REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+# Install files
+install(DIRECTORY 
+        launch 
+        meshes 
+        rviz 
+        urdf
+        DESTINATION share/${PROJECT_NAME})
 
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS
-        roscpp
-        gazebo_ros
-        sensor_msgs
-        image_transport
-        camera_info_manager
-        realsense_gazebo_plugin
-        realsense2_description
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-#  include
-  ${catkin_INCLUDE_DIRS}
-)
-
-install(DIRECTORY urdf
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-install(DIRECTORY meshes
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+ament_package()
