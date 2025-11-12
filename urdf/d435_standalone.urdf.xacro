@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<robot name="sensor_d435" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:arg name="name" default="D435_camera"/>
+    <xacro:arg name="parent" default="world"/>
+
+    <xacro:arg name="x" default="0"/>
+    <xacro:arg name="y" default="0"/>
+    <xacro:arg name="z" default="0"/>
+    <xacro:arg name="roll" default="0"/>
+    <xacro:arg name="pitch" default="0"/>
+    <xacro:arg name="yaw" default="0"/>
+    
+    <xacro:arg name="publish_pointcloud" default="false"/>
+    <xacro:arg name="align_depth" default="false"/>
+    
+	<xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435.urdf.xacro"/>
+	
+ 	<link name="$(arg parent)"/>
+	<xacro:sensor_d435 parent="$(arg parent)" name="$(arg name)" topics_ns="$(arg name)" 
+        publish_pointcloud="$(arg publish_pointcloud)" align_depth="$(arg align_depth)">
+		<origin xyz="$(arg x) $(arg y) $(arg z)" rpy="$(arg roll) $(arg pitch) $(arg yaw)"/>
+	</xacro:sensor_d435>
+	
+	<gazebo>
+    	<static>true</static>
+	</gazebo>
+
+</robot>
