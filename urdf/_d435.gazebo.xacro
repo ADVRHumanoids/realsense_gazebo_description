@@ -11,7 +11,6 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
   
   <xacro:macro name="gazebo_d435" params="reference_link
                                           camera_name:=camera
-                                          topics_ns:=camera
 
                                           depth_optical_frame
                                           color_optical_frame
@@ -66,8 +65,12 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
       <kd>1</kd>
       <!--<max_vel>0.01</max_vel>
       <min_depth>0</min_depth>-->
-      <sensor name="${camera_name}color" type="camera">
+      <sensor name="${camera_name}_color" type="camera">
+        <gz_frame_id>${camera_name}/camera_color_optical_frame</gz_frame_id>
+        <optical_frame_id>${camera_name}/camera_color_optical_frame</optical_frame_id>
+        <topic>${camera_name}/color/image_raw</topic>
         <camera name="${camera_name}">
+          <camera_info_topic>${camera_name}/color/camera_info</camera_info_topic>
           <horizontal_fov>${69.4*deg_to_rad}</horizontal_fov>
           <image>
             <width>${color_width}</width>
@@ -183,10 +186,21 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         <update_rate>${infra_fps}</update_rate>
         <visualize>false</visualize>
       </sensor>
-      <sensor name="${camera_name}depth" type="depth">
+      <sensor name="${camera_name}_depth" type="depth">
+        <xacro:unless value="${align_depth}">
+          <gz_frame_id>${camera_name}/camera_depth_optical_frame</gz_frame_id>
+          <optical_frame_id>${camera_name}/camera_depth_optical_frame</optical_frame_id>
+          <topic>${camera_name}/depth/image_raw</topic>
+        </xacro:unless>
+        <xacro:if value="${align_depth}">
+          <gz_frame_id>${camera_name}/camera_color_optical_frame</gz_frame_id>
+          <optical_frame_id>${camera_name}/camera_color_optical_frame</optical_frame_id>
+          <topic>${camera_name}/aligned_depth_to_color/image_raw</topic>
+        </xacro:if>
         <camera name="${camera_name}">
           <!-- align-depth settings -->
           <xacro:unless value="${align_depth}">
+          <camera_info_topic>${camera_name}/depth/camera_info</camera_info_topic>
           <horizontal_fov>${85.2*deg_to_rad}</horizontal_fov>
           <image>
               <width>${depth_width}</width>
@@ -194,6 +208,7 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             </image>
           </xacro:unless>
           <xacro:if value="${align_depth}">
+            <camera_info_topic>${camera_name}/aligned_depth_to_color/camera_info</camera_info_topic>
             <horizontal_fov>${69.4*deg_to_rad}</horizontal_fov>
             <image>
               <width>${color_width}</width>
@@ -260,53 +275,6 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         </xacro:if>
         <visualize>false</visualize>
       </sensor>
-    </gazebo>
-
-        <gazebo>
-      <plugin name="${topics_ns}" filename="librealsense_gazebo_plugin.so">
-        <prefix>${camera_name}</prefix>
-
-      	<colorUpdateRate>${color_fps}</colorUpdateRate>
-      	<colorTopicName>color/image_raw</colorTopicName>
-      	<colorOpticalframeName>${color_optical_frame}</colorOpticalframeName>
-      	<colorCameraInfoTopicName>color/camera_info</colorCameraInfoTopicName>
-
-        <!-- Infrared camera settings -->
-      	<infraredUpdateRate>${infra_fps}</infraredUpdateRate>
-      	<infrared1TopicName>infra1/image_raw</infrared1TopicName>
-      	<infrared2TopicName>infra2/image_raw</infrared2TopicName>
-      	<infrared1CameraInfoTopicName>infra1/camera_info</infrared1CameraInfoTopicName>
-      	<infrared2CameraInfoTopicName>infra2/camera_info</infrared2CameraInfoTopicName>
-      	<infrared1OpticalframeName>${infrared1_optical_frame}</infrared1OpticalframeName>
-      	<infrared2OpticalframeName>${infrared2_optical_frame}</infrared2OpticalframeName>
-
-        <!-- Depth camera settings -->
-      	<rangeMinDepth>${clip_distance_min}</rangeMinDepth>
-        <xacro:unless value="${clip_distance > 0.0}">
-      	  <rangeMaxDepth>10.0</rangeMaxDepth>
-        </xacro:unless>
-        <xacro:if value="${clip_distance > 0.0}">
-          <rangeMaxDepth>${clip_distance}</rangeMaxDepth>
-        </xacro:if>
-        <xacro:unless value="${align_depth}">
-            <depthUpdateRate>${depth_fps}</depthUpdateRate>
-      	    <depthTopicName>depth/image_raw</depthTopicName>
-      	    <depthCameraInfoTopicName>depth/camera_info</depthCameraInfoTopicName>
-        	<depthOpticalframeName>${depth_optical_frame}</depthOpticalframeName>
-        </xacro:unless>
-        <xacro:if value="${align_depth}">
-            <depthUpdateRate>${color_fps}</depthUpdateRate>
-      	    <depthTopicName>aligned_depth_to_color/image_raw</depthTopicName>
-      	    <depthCameraInfoTopicName>aligned_depth_to_color/camera_info</depthCameraInfoTopicName>
-      	    <depthOpticalframeName>${color_optical_frame}</depthOpticalframeName>
-        </xacro:if>
-
-        <!-- Pointlcloud settings -->
-        <pointCloud>${publish_pointcloud}</pointCloud>
-      	<pointCloudTopicName>depth/color/points</pointCloudTopicName>
-      	<pointCloudCutoff>0.5</pointCloudCutoff>
-        <pointCloudCutoffMax>9.0</pointCloudCutoffMax>
-      </plugin>
     </gazebo>
 
   </xacro:macro>
