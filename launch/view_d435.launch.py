@@ -42,7 +42,7 @@ def generate_launch_description():
     pose_pitch_arg = DeclareLaunchArgument("pose_pitch", default_value="0.0")
     pose_yaw_arg = DeclareLaunchArgument("pose_yaw", default_value="0.0")
 
-    rviz_config_dir = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'rviz', 'urdf.rviz')
+    rviz_config_dir = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'rviz', 'd435i.rviz')
     xacro_path = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'urdf', 'd435_standalone.urdf.xacro')
     urdf = to_urdf(xacro_path, {
         'use_nominal_extrinsics': 'true', 

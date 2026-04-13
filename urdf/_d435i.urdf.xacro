@@ -25,7 +25,6 @@ aluminum peripherial evaluation case.
   <!-- Includes -->
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_materials.urdf.xacro" />
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_usb_plug.urdf.xacro" />
-  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.gazebo.xacro" />
 
   <xacro:macro name="sensor_d435i" params="parent
                                           name:=camera
@@ -62,11 +61,6 @@ aluminum peripherial evaluation case.
                                           color_cx:= 326.2506103515625
                                           color_cy:= 254.5507049560547  
                                           visualize:=false
-
-                                          unite_imu_method:=false
-                                          accel_fps:=250
-                                          gyro_fps:=400
-
                                           *origin">
     <xacro:property name="M_PI" value="3.1415926535897931" />
 
@@ -203,34 +197,34 @@ aluminum peripherial evaluation case.
       <link name="${name}_color_optical_frame"/>
 
       <!-- camera accel joints and links -->
+      <link name="${name}_accel_frame" />
       <joint name="${name}_accel_joint" type="fixed">
-        <origin xyz="-0.00174 0.00552 0.0176" rpy="0 0 0"/>
-        <parent link="${name}_link"/>
-        <child link="${name}_accel_frame"/>
+        <origin xyz = "-0.01174 -0.00552 0.0051" rpy = "0 0 0" />
+        <parent link="${name}_link" />
+        <child link="${name}_accel_frame" />
       </joint>
-      <link name="${name}_accel_frame"/>
 
-      <joint name="${name}_accel_optical_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
-        <parent link="${name}_accel_frame"/>
-        <child link="${name}_accel_optical_frame"/>
-      </joint>
       <link name="${name}_accel_optical_frame"/>
+      <joint name="${name}_accel_optical_joint" type="fixed">
+        <origin xyz = "0 0 0" rpy = "${-M_PI/2} 0 ${-M_PI/2}" />
+        <parent link="${name}_accel_frame" />
+        <child link="${name}_accel_optical_frame" />
+      </joint>
 
       <!-- camera gyro joints and links -->
-      <joint name="${name}_gyro_joint" type="fixed">
-        <origin xyz="-0.00174 0.00552 0.0176" rpy="0 0 0"/>
-        <parent link="${name}_link"/>
-        <child link="${name}_gyro_frame"/>
-      </joint>
       <link name="${name}_gyro_frame"/>
-
-      <joint name="${name}_gyro_optical_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
-        <parent link="${name}_gyro_frame"/>
-        <child link="${name}_gyro_optical_frame"/>
+      <joint name="${name}_gyro_joint" type="fixed">
+        <origin xyz = "-0.01174 -0.00552 0.0051" rpy = "0 0 0" />
+        <parent link="${name}_link" />
+        <child link="${name}_gyro_frame" />
       </joint>
+
       <link name="${name}_gyro_optical_frame"/>
+      <joint name="${name}_gyro_optical_joint" type="fixed">
+        <origin xyz = "0 0 0" rpy = "${-M_PI/2} 0 ${-M_PI/2}" />
+        <parent link="${name}_gyro_frame" />
+        <child link="${name}_gyro_optical_frame" />
+      </joint>
     </xacro:if>
 
     <xacro:if value="${add_plug}">
@@ -238,53 +232,6 @@ aluminum peripherial evaluation case.
         <origin xyz="${d435_cam_mount_from_center_offset - 0.02095} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
       </xacro:usb_plug>
     </xacro:if>
-
-    <!-- Realsense Gazebo Plugin -->
-    <xacro:gazebo_d435i camera_name="${name}" 
-                       reference_link="${name}_link" 
-
-                       depth_optical_frame="${name}_depth_optical_frame" 
-                       depth_width="${depth_width}"
-                       depth_height="${depth_height}"
-                       depth_fps="${depth_fps}"
-                       depth_fx="${depth_fx}"
-                       depth_fy="${depth_fy}"
-                       depth_cx="${depth_cx}"
-                       depth_cy="${depth_cy}"
-
-                       color_optical_frame="${name}_color_optical_frame"
-                       color_width="${color_width}"
-                       color_height="${color_height}"
-                       color_fps="${color_fps}"
-                       color_fx="${color_fx}"
-                       color_fy="${color_fy}"
-                       color_cx="${color_cx}"
-                       color_cy="${color_cy}"
-
-                       infrared1_optical_frame="${name}_infra1_ir_optical_frame" 
-                       infrared2_optical_frame="${name}_infra2_ir_optical_frame"
-                       infra_width="${infra_width}"
-                       infra_height="${infra_height}"
-                       infra_fps="${infra_fps}"
-                       infra_fx="${infra_fx}"
-                       infra_fy="${infra_fy}"
-                       infra_cx="${infra_cx}"
-                       infra_cy="${infra_cy}"
-                       infra2_tx="${infra2_tx}"
-
-                       publish_pointcloud="${publish_pointcloud}"
-                       clip_distance="${clip_distance}"
-                       clip_distance_min="${clip_distance_min}"
-                       align_depth="${align_depth}"
-                       visualize="${visualize}"
-
-                        accel_optical_frame="${name}_accel_optical_frame"
-                        gyro_optical_frame="${name}_gyro_optical_frame"
-                        accel_fps="${accel_fps}"
-                        gyro_fps="${gyro_fps}"
-                        unite_imu_method="${unite_imu_method}"
-
-    />
  
   </xacro:macro>
 </robot>

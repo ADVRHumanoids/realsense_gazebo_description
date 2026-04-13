@@ -1,4 +1,4 @@
-# Copyright 2023 Intel Corporation. All Rights Reserved.
+# Copyright 2023 RealSense, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from launch_utils import to_urdf
 
 
 def generate_launch_description():
-    available_urdf_files = [f for f in os.listdir(os.path.join(get_package_share_directory('realsense_gazebo_description'), 'urdf')) if f.startswith('test_')]
+    available_urdf_files = [f for f in os.listdir(os.path.join(get_package_share_directory('realsense_gazebo_description'), 'urdf'))]
     params = dict([aa for aa in [aa.split(':=') for aa in sys.argv] if len(aa) == 2])
     if ('model' not in params or params['model'] not in available_urdf_files):
         print('USAGE:')
@@ -33,7 +33,7 @@ def generate_launch_description():
         print('\n'.join(available_urdf_files))
         return launch.LaunchDescription()
 
-    rviz_config_dir = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'rviz', 'urdf.rviz')
+    rviz_config_dir = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'rviz', 'd435i.rviz')
     xacro_path = os.path.join(get_package_share_directory('realsense_gazebo_description'), 'urdf', params['model'])
     urdf = to_urdf(xacro_path, {'use_nominal_extrinsics': 'true', 'add_plug': 'true'})
     rviz_node = Node(

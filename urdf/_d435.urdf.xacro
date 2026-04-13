@@ -25,7 +25,6 @@ aluminum peripherial evaluation case.
   <!-- Includes -->
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_materials.urdf.xacro" />
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_usb_plug.urdf.xacro" />
-  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435.gazebo.xacro" />
 
   <xacro:macro name="sensor_d435" params="parent
                                           name:=camera
@@ -203,45 +202,6 @@ aluminum peripherial evaluation case.
         <origin xyz="${d435_cam_mount_from_center_offset - 0.02095} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
       </xacro:usb_plug>
     </xacro:if>
-
-    <!-- Realsense Gazebo Plugin -->
-    <xacro:gazebo_d435 camera_name="${name}" 
-                       reference_link="${name}_link" 
-                       depth_optical_frame="${name}_depth_optical_frame" 
-                       depth_width="${depth_width}"
-                       depth_height="${depth_height}"
-                       depth_fps="${depth_fps}"
-                       depth_fx="${depth_fx}"
-                       depth_fy="${depth_fy}"
-                       depth_cx="${depth_cx}"
-                       depth_cy="${depth_cy}"
-
-                       color_optical_frame="${name}_color_optical_frame"
-                       color_width="${color_width}"
-                       color_height="${color_height}"
-                       color_fps="${color_fps}"
-                       color_fx="${color_fx}"
-                       color_fy="${color_fy}"
-                       color_cx="${color_cx}"
-                       color_cy="${color_cy}"
-
-                       infrared1_optical_frame="${name}_infra1_ir_optical_frame" 
-                       infrared2_optical_frame="${name}_infra2_ir_optical_frame"
-                       infra_width="${infra_width}"
-                       infra_height="${infra_height}"
-                       infra_fps="${infra_fps}"
-                       infra_fx="${infra_fx}"
-                       infra_fy="${infra_fy}"
-                       infra_cx="${infra_cx}"
-                       infra_cy="${infra_cy}"
-                       infra2_tx="${infra2_tx}"
-
-                       publish_pointcloud="${publish_pointcloud}"
-                       clip_distance="${clip_distance}"
-                       clip_distance_min="${clip_distance_min}"
-                       align_depth="${align_depth}"
-                       visualize="${visualize}"
-    />
  
   </xacro:macro>
 </robot>
