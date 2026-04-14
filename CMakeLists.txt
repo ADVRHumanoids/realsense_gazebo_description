@@ -19,7 +19,8 @@ find_package(ament_cmake REQUIRED)
 
 # Install files
 install(DIRECTORY 
-        launch 
+        launch
+        worlds
         meshes 
         rviz 
         urdf
