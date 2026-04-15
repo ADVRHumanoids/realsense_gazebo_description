@@ -65,8 +65,7 @@ aluminum peripherial evaluation case.
                                           color_cy:= 254.5507049560547  
                                           visualize:=false
 
-                                          unite_imu_method:=false
-                                          accel_fps:=250
+                                          accel_fps:=200
                                           gyro_fps:=400
 
                                           *origin">
@@ -259,6 +258,7 @@ aluminum peripherial evaluation case.
                       depth_fy="${depth_fy}"
                       depth_cx="${depth_cx}"
                       depth_cy="${depth_cy}"
+
                       color_optical_frame="${name}_color_optical_frame"
                       color_width="${color_width}"
                       color_height="${color_height}"
@@ -290,7 +290,6 @@ aluminum peripherial evaluation case.
                       gyro_optical_frame="${name}_gyro_optical_frame"
                       accel_fps="${accel_fps}"
                       gyro_fps="${gyro_fps}"
-                      unite_imu_method="${unite_imu_method}"
 
     />
     </xacro:if>

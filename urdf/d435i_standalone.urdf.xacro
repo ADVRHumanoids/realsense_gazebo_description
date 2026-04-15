@@ -12,21 +12,21 @@
     <xacro:arg name="pitch" default="0"/>
     <xacro:arg name="yaw" default="0"/>
     
-    <xacro:arg name="publish_pointcloud" default="false"/>
     <xacro:arg name="align_depth" default="false"/>
 
     <xacro:arg name="use_nominal_extrinsics" default="false"/>
     <xacro:arg name="add_plug" default="false" />
     <xacro:arg name="use_mesh" default="true" />
     <xacro:arg name="gazebo_urdf" default="false" />
-    
+    <xacro:arg name="infra_enable" default="false"/>
+
 	<xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.urdf.xacro"/>
 	
  	<link name="$(arg parent)"/>
 	<xacro:sensor_d435i parent="$(arg parent)" name="$(arg name)"
         use_nominal_extrinsics="$(arg use_nominal_extrinsics)" add_plug="$(arg add_plug)"
         use_mesh="$(arg use_mesh)" gazebo_urdf="$(arg gazebo_urdf)"
-        publish_pointcloud="$(arg publish_pointcloud)" align_depth="$(arg align_depth)">
+        infra_enable="$(arg infra_enable)" align_depth="$(arg align_depth)">
 		<origin xyz="$(arg x) $(arg y) $(arg z)" rpy="$(arg roll) $(arg pitch) $(arg yaw)"/>
 	</xacro:sensor_d435i>
 	

@@ -49,12 +49,13 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                                           publish_pointcloud:=true
                                           visualize:=false
 
-                                          unite_imu_method:=false
-                                          accel_fps:=250
+                                          accel_fps:=200
                                           gyro_fps:=400
                                           gyro_optical_frame
                                           accel_optical_frame
                                           ">
+                                          
+    <!-- NOTE: accel_fps parameter is not used. See line 300 and sdf docs-->
 
     <!-- Load parameters to model's main link-->
     <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
@@ -90,11 +91,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <near>0.1</near>
             <far>100</far>
           </clip>
-          <!-- <noise>
+          <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>0.007</stddev>
-          </noise> -->
+          </noise>
           <lens>
             <projection>
               <p_fx>${color_fx}</p_fx>
@@ -133,11 +134,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <!-- <noise>
+            <noise>
               <type>gaussian</type>
               <mean>0.0</mean>
-              <stddev>0.05</stddev>
-            </noise> -->
+              <stddev>0.02</stddev>
+            </noise>
             <lens>
               <projection>
                 <p_fx>${infra_fx}</p_fx>
@@ -175,11 +176,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <!-- <noise>
+            <noise>
               <type>gaussian</type>
               <mean>0.0</mean>
-              <stddev>0.05</stddev>
-            </noise> -->
+              <stddev>0.02</stddev>
+            </noise>
             <lens>
               <projection>
                 <p_fx>${infra_fx}</p_fx>
@@ -241,11 +242,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
               <far>${clip_distance}</far>
             </xacro:if>
           </clip>
-          <!-- <noise>
+          <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
-            <stddev>0.100</stddev>
-          </noise> -->
+            <stddev>0.020</stddev>
+          </noise>
           <lens>
             <xacro:unless value="${align_depth}">
               <projection>
@@ -292,58 +293,71 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         </xacro:if>
         <visualize>false</visualize>
       </sensor>
-      <!-- IMU -->
-      <xacro:if value="${unite_imu_method == 'copy' or unite_imu_method == 'linear_interpolation'}">
-        <sensor name="${camera_name}imu" type="imu">
-          <always_on>true</always_on>
-          <update_rate>${gyro_fps}</update_rate>
-          <topic>${camera_name}/imu/sample</topic>
-          <plugin name="${camera_name}imu" filename="libgazebo_ros_imu_sensor.so">
-            <topicName>${camera_name}/imu/sample</topicName>
-            <bodyName>${camera_name}_link</bodyName>
-            <frameName>${gyro_optical_frame}</frameName>
-            <updateRateHZ>${gyro_fps}</updateRateHZ>
-            <gaussianNoise>0.1</gaussianNoise>
-            <xyzOffset>0 0 0</xyzOffset>
-            <rpyOffset>0 0 0</rpyOffset>
-          </plugin>
-        </sensor>
-      </xacro:if>
-      <!-- Accel and gyro -->
-      <!-- TODO to port to ROS2 the librealsense_gazebo_accel_sensor and librealsense_gazebo_gyro_sensor -->
-      <!-- <xacro:unless value="${unite_imu_method == 'copy' or unite_imu_method == 'linear_interpolation'}">
-        <sensor name="${camera_name}accel" type="imu">
-          <always_on>true</always_on>
-          <update_rate>${accel_fps}</update_rate>
-          <topic>${camera_name}/accel/sample</topic>
-          <plugin name="${topics_ns}_accel_plugin" filename="librealsense_gazebo_accel_sensor.so">
-            <topicName>${camera_name}/accel/sample</topicName>
-            <bodyName>${camera_name}_link</bodyName>
-            <updateRateHZ>${accel_fps}</updateRateHZ>
-            <gaussianNoise>0.1</gaussianNoise>
-            <xyzOffset>0 0 0</xyzOffset>
-            <rpyOffset>0 0 0</rpyOffset>
-            <frameName>${accel_optical_frame}</frameName>
-            <initialOrientationAsReference>false</initialOrientationAsReference>
-          </plugin>
-          <pose>0 0 0 0 0 0</pose>
-        </sensor>
-        <sensor name="${camera_name}gyro" type="imu">
-          <always_on>true</always_on>
-          <update_rate>${gyro_fps}</update_rate>
-          <topic>${camera_name}/gyro/sample</topic>
-          <plugin name="${topics_ns}_gyro_plugin" filename="librealsense_gazebo_gyro_sensor.so">
-            <topicName>${camera_name}/gyro/sample</topicName>
-            <bodyName>${camera_name}_link</bodyName>
-            <updateRateHZ>${gyro_fps}</updateRateHZ>
-            <gaussianNoise>0.1</gaussianNoise>
-            <xyzOffset>0 0 0</xyzOffset>
-            <rpyOffset>0 0 0</rpyOffset>
-            <frameName>${gyro_optical_frame}</frameName>
-            <initialOrientationAsReference>false</initialOrientationAsReference>
-          </plugin>
-        </sensor>
-      </xacro:unless> -->
+      <!-- IMU based on BMI085 datasaheet-->
+      <sensor name="${camera_name}_imu" type="imu">
+        <always_on>true</always_on>
+        <!-- Accelerometer Sample Rate: 100, 200 (Hz)
+             Gyroscope Sample Rate: 200, 400 (Hz)
+             Selected 200 Hz as it is the common one-->
+        <update_rate>${accel_fps}</update_rate>
+        <visualize>true</visualize>
+        <topic>${camera_name}/imu</topic>
+        <gz_frame_id>${gyro_optical_frame}</gz_frame_id>
+        <imu>
+          <angular_velocity>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.68e-03</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.75e-02</bias_stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.68e-03</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.75e-02</bias_stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.68e-03</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.75e-02</bias_stddev>
+              </noise>
+            </z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>7.06e-09</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.96e-07</bias_stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>7.06e-09</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.96e-07</bias_stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>9.08e-09</stddev>
+                <bias_mean>0</bias_mean>
+                <bias_stddev>1.96e-07</bias_stddev>
+              </noise>
+            </z>
+          </linear_acceleration>
+        </imu>
+      </sensor>
     </gazebo>
 
   </xacro:macro>
