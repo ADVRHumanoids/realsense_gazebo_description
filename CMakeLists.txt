@@ -24,6 +24,7 @@ install(DIRECTORY
         meshes 
         rviz 
         urdf
+        materials
         DESTINATION share/${PROJECT_NAME})
 
 ament_package()

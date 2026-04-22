@@ -40,7 +40,7 @@ def launch_setup(context, *args, **kwargs):
         xacro_file, 
         mappings={
             'use_nominal_extrinsics': 'true', 
-            'add_plug': 'false',
+            'add_plug': 'true',
             'use_mesh': 'true',
             'name': LaunchConfiguration("name").perform(context),
             'parent': LaunchConfiguration("parent").perform(context), 
@@ -52,7 +52,7 @@ def launch_setup(context, *args, **kwargs):
             'pitch': LaunchConfiguration("pose_pitch").perform(context),
             'align_depth': LaunchConfiguration("align_depth").perform(context),
             'gazebo_urdf': LaunchConfiguration("gazebo_urdf").perform(context),
-            'infra_enable': LaunchConfiguration("infra_enable").perform(context),
+            'enable_infrared': LaunchConfiguration("enable_infrared").perform(context),
         },
     )
     urdf = {"robot_description": robot_description_content}
@@ -85,7 +85,7 @@ def launch_setup(context, *args, **kwargs):
             FindPackageShare("ros_gz_sim"), "/launch/gz_sim.launch.py"
         ], ),
         launch_arguments={
-            "gz_args": f" -r -v 1 {LaunchConfiguration('world_file').perform(context)}",
+            "gz_args": f" -r -v 5 {LaunchConfiguration('world_file').perform(context)}",
         }.items(),
     )
 
@@ -147,7 +147,7 @@ def launch_setup(context, *args, **kwargs):
                     f'/{LaunchConfiguration("name").perform(context)}/depth/points')])
         
     # Infrared bridging
-    if (LaunchConfiguration("infra_enable").perform(context).lower() == "true"):
+    if (LaunchConfiguration("enable_infrared").perform(context).lower() == "true"):
         bridge_topics.extend([
             f'/{LaunchConfiguration("name").perform(context)}/infra1/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
             f'/{LaunchConfiguration("name").perform(context)}/infra1/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
@@ -213,7 +213,7 @@ def generate_launch_description():
     declared_arguments.append(DeclareLaunchArgument("publish_pointcloud", default_value="false"))
     declared_arguments.append(DeclareLaunchArgument("align_depth", default_value="false"))
     declared_arguments.append(DeclareLaunchArgument("gazebo_urdf", default_value="true"))
-    declared_arguments.append(DeclareLaunchArgument("infra_enable", default_value="false"))
+    declared_arguments.append(DeclareLaunchArgument("enable_infrared", default_value="false"))
 
 
     return LaunchDescription(
