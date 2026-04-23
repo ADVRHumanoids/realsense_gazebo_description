@@ -140,7 +140,8 @@ aluminum peripherial evaluation case.
       <visual>
         <xacro:if value="${use_mesh}">
           <!-- the mesh origin is at front plate in between the two infrared camera axes -->
-          <!-- <origin xyz="${-d435_zero_depth_to_glass - d435_glass_to_front - 0.006} ${-d435_cam_depth_py} 0" rpy="0 0 ${M_PI/2}"/> -->
+          <!-- <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/> -->
+          <!-- NOTE: a custom mesh is applied for the visual and the origin is not the same as the camera link -->
           <origin xyz="${-d435_cam_depth_py - 0.003} ${-d435_cam_depth_py} 0" rpy="0 0 ${M_PI/2}"/>
           <geometry>
             <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435.dae" />
@@ -234,7 +235,7 @@ aluminum peripherial evaluation case.
 
     <xacro:if value="${add_plug}">
       <xacro:usb_plug parent="${name}_link" name="${name}_usb_plug">
-        <origin xyz="${d435_cam_mount_from_center_offset - 0.02095} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
+        <origin xyz="${d435_cam_mount_from_center_offset - 0.031} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
       </xacro:usb_plug>
     </xacro:if>
 

@@ -61,19 +61,6 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
     <!-- COLOR CAMERA -->
     
     <gazebo reference="${color_frame}">
-      <self_collide>0</self_collide>
-      <enable_wind>0</enable_wind>
-      <kinematic>0</kinematic>
-      <!--<gravity>1</gravity>-->
-      <!--<mu>1</mu>-->
-      <mu2>1</mu2>
-      <fdir1>0 0 0</fdir1>
-      <!--<slip1>0</slip1>
-      <slip2>0</slip2>-->
-      <kp>1e+13</kp>
-      <kd>1</kd>
-      <!--<max_vel>0.01</max_vel>
-      <min_depth>0</min_depth>-->
       <sensor name="${camera_name}_color" type="camera">
         <gz_frame_id>${color_frame}</gz_frame_id>
         <topic>${camera_name}/color/image_raw</topic>
@@ -139,11 +126,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <noise>
+            <!-- <noise>
               <type>gaussian</type>
               <mean>0.0</mean>
               <stddev>0.02</stddev>
-            </noise>
+            </noise> -->
             <lens>
               <projection>
                 <p_fx>${infra_fx}</p_fx>
@@ -184,11 +171,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <noise>
+            <!-- <noise>
               <type>gaussian</type>
               <mean>0.0</mean>
               <stddev>0.02</stddev>
-            </noise>
+            </noise> -->
             <lens>
               <projection>
                 <p_fx>${infra_fx}</p_fx>
@@ -219,13 +206,6 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
 
     <xacro:if value="${align_depth}">
       <gazebo reference="${color_frame}">
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-        <mu2>1</mu2>
-        <fdir1>0 0 0</fdir1>
-        <kp>1e+13</kp>
-        <kd>1</kd>
         <sensor name="${camera_name}_depth" type="depth">
           <topic>${camera_name}/aligned_depth_to_color/image_raw</topic>
           <gz_frame_id>${color_frame}</gz_frame_id>
@@ -246,6 +226,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                 <far>${clip_distance}</far>
               </xacro:if>
             </clip>
+            <!-- <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.020</stddev>
+            </noise> -->
             <lens>
               <projection>
                 <p_fx>${color_fx}</p_fx>
@@ -275,13 +260,6 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
 
     <xacro:unless value="${align_depth}">
       <gazebo reference="${depth_frame}">
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-        <mu2>1</mu2>
-        <fdir1>0 0 0</fdir1>
-        <kp>1e+13</kp>
-        <kd>1</kd>
         <sensor name="${camera_name}_depth" type="depth">
           <topic>${camera_name}/depth/image_raw</topic>
           <gz_frame_id>${depth_frame}</gz_frame_id>
@@ -302,6 +280,11 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                 <far>${clip_distance}</far>
               </xacro:if>
             </clip>
+            <!-- <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.020</stddev>
+            </noise> -->
             <lens>
               <projection>
                 <p_fx>${depth_fx}</p_fx>

@@ -26,15 +26,16 @@ aluminum peripherial evaluation case.
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_materials.urdf.xacro" />
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_usb_plug.urdf.xacro" />
   <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435i.gazebo.xacro" />
+  <xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435_gazebo_config.xacro" />
 
   <xacro:macro name="sensor_d435i" params="parent
                                           name:=camera
                                           use_nominal_extrinsics:=false 
                                           add_plug:=false 
-                                          use_mesh:=true 
-                                          publish_pointcloud:=false
-                                          align_depth:=true
+                                          use_mesh:=true
+                                          align_depth:=false
                                           gazebo_urdf:=false
+                                          custom_intrinsic:=false
 
                                           clip_distance:=-1.0
                                           clip_distance_min:=0.195
@@ -46,7 +47,7 @@ aluminum peripherial evaluation case.
                                           depth_cx:= 423.82025146484375
                                           depth_cy:= 241.2349395751953 
 
-                                          infra_enable:=false
+                                          enable_infrared:=false
                                           infra_width:=640
                                           infra_height:=480
                                           infra_fps:=30
@@ -72,7 +73,32 @@ aluminum peripherial evaluation case.
 
     <xacro:property name="M_PI" value="3.1415926535897931" />
     <xacro:property name= "GAZEBO_URDF" value="${gazebo_urdf}" /> <!-- set true to load gazebo plugins -->
-    <xacro:property name="INFRARED" value="${infra_enable}" /> <!-- Set true to enable infrared sensors-->
+    <xacro:property name="INFRARED" value="${enable_infrared}" /> <!-- Set true to enable infrared sensors-->
+
+    <xacro:d435_gazebo_config custom_intrinsic="${custom_intrinsic}"
+                              clip_distance_min="${clip_distance_min}"
+                              depth_width="${depth_width}"
+                              depth_height="${depth_height}"
+                              depth_fps="${depth_fps}"
+                              depth_fx="${depth_fx}"
+                              depth_fy="${depth_fy}"
+                              depth_cx="${depth_cx}"
+                              depth_cy="${depth_cy}"
+                              infra_width="${infra_width}"
+                              infra_height="${infra_height}"
+                              infra_fps="${infra_fps}"
+                              infra_fx="${infra_fx}"
+                              infra_fy="${infra_fy}"
+                              infra_cx="${infra_cx}"
+                              infra_cy="${infra_cy}"
+                              infra2_tx="${infra2_tx}"
+                              color_width="${color_width}"
+                              color_height="${color_height}"
+                              color_fps="${color_fps}"
+                              color_fx="${color_fx}"
+                              color_fy="${color_fy}"
+                              color_cx="${color_cx}"
+                              color_cy="${color_cy}" />
 
     <!-- The following values are approximate, and the camera node
      publishing TF values with actual calibrated camera extrinsic values -->
@@ -118,7 +144,9 @@ aluminum peripherial evaluation case.
       <visual>
         <xacro:if value="${use_mesh}">
           <!-- the mesh origin is at front plate in between the two infrared camera axes -->
-          <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+          <!-- <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/> -->
+          <!-- NOTE: a custom mesh is applied for the visual and the origin is not the same as the camera link -->
+          <origin xyz="${-d435_cam_depth_py - 0.003} ${-d435_cam_depth_py} 0" rpy="0 0 ${M_PI/2}"/>
           <geometry>
             <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435.dae" />
           </geometry>
@@ -241,48 +269,52 @@ aluminum peripherial evaluation case.
 
     <xacro:if value="${add_plug}">
       <xacro:usb_plug parent="${name}_link" name="${name}_usb_plug">
-        <origin xyz="${d435_cam_mount_from_center_offset - 0.02095} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
+        <origin xyz="${d435_cam_mount_from_center_offset - 0.031} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
       </xacro:usb_plug>
     </xacro:if>
 
     <xacro:if value="${GAZEBO_URDF}">
       <!-- Realsense Gazebo Plugin -->
-      <xacro:gazebo_d435i camera_name="${name}" 
-                      reference_link="${name}_link" 
+      <!-- Resolved intrinsic parameters are evaluated in '_d435_gazebo_config.xacro' file -->
+      <xacro:gazebo_d435i camera_name="${name}"
+                      color_frame="${name}_color_frame"
+                      depth_frame="${name}_depth_frame"
+                      infrared1_frame="${name}_infra1_frame"
+                      infrared2_frame="${name}_infra2_frame"
+                      imu_frame="${name}_gyro_optical_frame"
 
                       depth_optical_frame="${name}_depth_optical_frame" 
-                      depth_width="${depth_width}"
-                      depth_height="${depth_height}"
-                      depth_fps="${depth_fps}"
-                      depth_fx="${depth_fx}"
-                      depth_fy="${depth_fy}"
-                      depth_cx="${depth_cx}"
-                      depth_cy="${depth_cy}"
+                      depth_width="${resolved_depth_width}"
+                      depth_height="${resolved_depth_height}"
+                      depth_fps="${resolved_depth_fps}"
+                      depth_fx="${resolved_depth_fx}"
+                      depth_fy="${resolved_depth_fy}"
+                      depth_cx="${resolved_depth_cx}"
+                      depth_cy="${resolved_depth_cy}"
 
                       color_optical_frame="${name}_color_optical_frame"
-                      color_width="${color_width}"
-                      color_height="${color_height}"
-                      color_fps="${color_fps}"
-                      color_fx="${color_fx}"
-                      color_fy="${color_fy}"
-                      color_cx="${color_cx}"
-                      color_cy="${color_cy}"
+                      color_width="${resolved_color_width}"
+                      color_height="${resolved_color_height}"
+                      color_fps="${resolved_color_fps}"
+                      color_fx="${resolved_color_fx}"
+                      color_fy="${resolved_color_fy}"
+                      color_cx="${resolved_color_cx}"
+                      color_cy="${resolved_color_cy}"
 
-                      infrared1_optical_frame="${name}_infra1_ir_optical_frame" 
-                      infrared2_optical_frame="${name}_infra2_ir_optical_frame"
-                      infra_enable="${infra_enable}"
-                      infra_width="${infra_width}"
-                      infra_height="${infra_height}"
-                      infra_fps="${infra_fps}"
-                      infra_fx="${infra_fx}"
-                      infra_fy="${infra_fy}"
-                      infra_cx="${infra_cx}"
-                      infra_cy="${infra_cy}"
-                      infra2_tx="${infra2_tx}"
+                      infrared1_optical_frame="${name}_infra1_optical_frame" 
+                      infrared2_optical_frame="${name}_infra2_optical_frame"
+                      enable_infrared="${enable_infrared}"
+                      infra_width="${resolved_infra_width}"
+                      infra_height="${resolved_infra_height}"
+                      infra_fps="${resolved_infra_fps}"
+                      infra_fx="${resolved_infra_fx}"
+                      infra_fy="${resolved_infra_fy}"
+                      infra_cx="${resolved_infra_cx}"
+                      infra_cy="${resolved_infra_cy}"
+                      infra2_tx="${resolved_infra2_tx}"
 
-                      publish_pointcloud="${publish_pointcloud}"
                       clip_distance="${clip_distance}"
-                      clip_distance_min="${clip_distance_min}"
+                      clip_distance_min="${resolved_clip_distance_min}"
                       align_depth="${align_depth}"
                       visualize="${visualize}"
 
