@@ -7,11 +7,12 @@ Copyright(c) 2017 PAL Robotics, S.L. All Rights Reserved
 This is the Gazebo URDF model for the Intel RealSense D435 camera
 -->
   
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       xmlns:gz="http://gazebosim.org/schema"> <!-- For the depth camera custom sensor -->
   
   <xacro:macro name="gazebo_d435i" params="
                                           camera_name:=camera
-
+                                          
                                           color_frame
                                           depth_frame
                                           infrared1_frame
@@ -51,8 +52,10 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                                           color_cx:= 326.2506103515625
                                           color_cy:= 254.5507049560547
 
-                                          align_depth:=false
-                                          visualize:=false
+	                                        align_depth:=false
+	                                        use_intrinsic:=false
+	                                        publish_pointcloud:=false
+	                                        visualize:=false
 
                                           accel_fps:=200
                                           gyro_fps:=400
@@ -65,6 +68,9 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
     <!-- Load parameters to model's main link-->
     <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
     <xacro:property name="INFRARED" value="${enable_infrared}" />
+    <xacro:property name="USE_INTRINSIC" value="${use_intrinsic}" />
+    <xacro:property name="PUBLISH_POINTCLOUD" value="${publish_pointcloud}" />
+
 
     <!-- COLOR CAMERA -->
     
@@ -75,7 +81,7 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         <camera name="${camera_name}">
           <camera_info_topic>${camera_name}/color/camera_info</camera_info_topic>
           <optical_frame_id>${color_optical_frame}</optical_frame_id>
-          <horizontal_fov>${69.4*deg_to_rad}</horizontal_fov>
+          <horizontal_fov>${2.0 * atan(color_width / (2.0 * color_fx))}</horizontal_fov>
           <image>
             <width>${color_width}</width>
             <height>${color_height}</height>
@@ -90,155 +96,7 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <mean>0.0</mean>
             <stddev>0.007</stddev>
           </noise> -->
-          <lens>
-            <projection>
-              <p_fx>${color_fx}</p_fx>
-              <p_fy>${color_fy}</p_fy>
-              <p_cx>${color_cx}</p_cx>
-              <p_cy>${color_cy}</p_cy>
-              <tx>0</tx>
-              <ty>0</ty>
-            </projection>
-            <intrinsics>
-              <fx>${color_fx}</fx>
-              <fy>${color_fy}</fy>
-              <cx>${color_cx}</cx>
-              <cy>${color_cy}</cy>
-              <s>0</s>
-            </intrinsics>
-          </lens>
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>${color_fps}</update_rate>
-        <visualize>${visualize}</visualize>
-      </sensor>
-    </gazebo>
-
-
-    <!-- INFRARED -->
-    
-    <xacro:if value="${INFRARED}">
-      <gazebo reference="${infrared1_frame}">
-        <sensor name="${camera_name}_ired1" type="camera">
-          <gz_frame_id>${infrared1_frame}</gz_frame_id>
-          <topic>${camera_name}/infra1/image_raw</topic>
-          <camera name="${camera_name}_ired1">
-            <optical_frame_id>${infrared1_optical_frame}</optical_frame_id>
-            <horizontal_fov>${85.2*deg_to_rad}</horizontal_fov>
-            <image>
-              <width>${infra_width}</width>
-              <height>${infra_height}</height>
-              <format>L_INT8</format>
-            </image>
-            <clip>
-              <near>0.1</near>
-              <far>100</far>
-            </clip>
-            <!-- <noise>
-              <type>gaussian</type>
-              <mean>0.0</mean>
-              <stddev>0.02</stddev>
-            </noise> -->
-            <lens>
-              <projection>
-                <p_fx>${infra_fx}</p_fx>
-                <p_fy>${infra_fy}</p_fy>
-                <p_cx>${infra_cx}</p_cx>
-                <p_cy>${infra_cy}</p_cy>
-                <tx>0</tx>
-                <ty>0</ty>
-              </projection>
-              <intrinsics>
-                <fx>${infra_fx}</fx>
-                <fy>${infra_fy}</fy>
-                <cx>${infra_cx}</cx>
-                <cy>${infra_cy}</cy>
-                <s>0</s>
-              </intrinsics>
-            </lens>
-          </camera>
-          <always_on>1</always_on>
-          <update_rate>${infra_fps}</update_rate>
-          <visualize>false</visualize>
-        </sensor>
-      </gazebo>
-
-      <gazebo reference="${infrared2_frame}">
-        <sensor name="${camera_name}_ired2" type="camera">
-          <gz_frame_id>${infrared1_frame}</gz_frame_id>
-          <topic>${camera_name}/infra2/image_raw</topic>
-          <camera name="${camera_name}_ired2">
-            <optical_frame_id>${infrared2_optical_frame}</optical_frame_id>
-            <horizontal_fov>${85.2*deg_to_rad}</horizontal_fov>
-            <image>
-              <width>${infra_width}</width>
-              <height>${infra_height}</height>
-              <format>L_INT8</format>
-            </image>
-            <clip>
-              <near>0.1</near>
-              <far>100</far>
-            </clip>
-            <!-- <noise>
-              <type>gaussian</type>
-              <mean>0.0</mean>
-              <stddev>0.02</stddev>
-            </noise> -->
-            <lens>
-              <projection>
-                <p_fx>${infra_fx}</p_fx>
-                <p_fy>${infra_fy}</p_fy>
-                <p_cx>${infra_cx}</p_cx>
-                <p_cy>${infra_cy}</p_cy>
-                <tx>${infra2_tx}</tx>
-                <ty>0</ty>
-              </projection>
-              <intrinsics>
-                <fx>${infra_fx}</fx>
-                <fy>${infra_fy}</fy>
-                <cx>${infra_cx}</cx>
-                <cy>${infra_cy}</cy>
-                <s>0</s>
-              </intrinsics>
-            </lens>
-          </camera>
-          <always_on>1</always_on>
-          <update_rate>${infra_fps}</update_rate>
-          <visualize>false</visualize>
-        </sensor>
-      </gazebo>
-    </xacro:if>
-
-
-    <!-- DEPTH CAMERA ALIGNED -->
-
-    <xacro:if value="${align_depth}">
-      <gazebo reference="${color_frame}">
-        <sensor name="${camera_name}_depth" type="depth">
-          <topic>${camera_name}/aligned_depth_to_color/image_raw</topic>
-          <gz_frame_id>${color_frame}</gz_frame_id>
-          <camera name="${camera_name}_aligned_depth_camera">
-            <camera_info_topic>${camera_name}/aligned_depth_to_color/camera_info</camera_info_topic>
-            <optical_frame_id>${color_optical_frame}</optical_frame_id>
-            <horizontal_fov>${69.4*deg_to_rad}</horizontal_fov>
-            <image>
-              <width>${color_width}</width>
-              <height>${color_height}</height>
-            </image>
-            <clip>
-              <near>${clip_distance_min}</near>
-              <xacro:unless value="${clip_distance > 0.0}">
-                <far>10</far>
-              </xacro:unless>
-              <xacro:if value="${clip_distance > 0.0}">
-                <far>${clip_distance}</far>
-              </xacro:if>
-            </clip>
-            <!-- <noise>
-              <type>gaussian</type>
-              <mean>0.0</mean>
-              <stddev>0.020</stddev>
-            </noise> -->
+          <xacro:if value="${USE_INTRINSIC}">
             <lens>
               <projection>
                 <p_fx>${color_fx}</p_fx>
@@ -256,6 +114,164 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
                 <s>0</s>
               </intrinsics>
             </lens>
+          </xacro:if>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>${color_fps}</update_rate>
+        <visualize>${visualize}</visualize>
+      </sensor>
+    </gazebo>
+
+    
+    <xacro:if value="${INFRARED}">
+
+        <!-- INFRARED -->
+        
+      <gazebo reference="${infrared1_frame}">
+        <sensor name="${camera_name}_ired1" type="camera">
+          <gz_frame_id>${infrared1_frame}</gz_frame_id>
+          <topic>${camera_name}/infra1/image_raw</topic>
+          <camera name="${camera_name}_ired1">
+            <optical_frame_id>${infrared1_optical_frame}</optical_frame_id>
+            <horizontal_fov>${2.0 * atan(infra_width / (2.0 * infra_fx))}</horizontal_fov>
+            <image>
+              <width>${infra_width}</width>
+              <height>${infra_height}</height>
+              <format>L_INT8</format>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+            <!-- <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.02</stddev>
+            </noise> -->
+            <xacro:if value="${USE_INTRINSIC}">
+              <lens>
+                <projection>
+                  <p_fx>${infra_fx}</p_fx>
+                  <p_fy>${infra_fy}</p_fy>
+                  <p_cx>${infra_cx}</p_cx>
+                  <p_cy>${infra_cy}</p_cy>
+                  <tx>0</tx>
+                  <ty>0</ty>
+                </projection>
+                <intrinsics>
+                  <fx>${infra_fx}</fx>
+                  <fy>${infra_fy}</fy>
+                  <cx>${infra_cx}</cx>
+                  <cy>${infra_cy}</cy>
+                  <s>0</s>
+                </intrinsics>
+              </lens>
+            </xacro:if>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>${infra_fps}</update_rate>
+          <visualize>false</visualize>
+        </sensor>
+      </gazebo>
+
+      <gazebo reference="${infrared2_frame}">
+        <sensor name="${camera_name}_ired2" type="camera">
+          <gz_frame_id>${infrared2_frame}</gz_frame_id>
+          <topic>${camera_name}/infra2/image_raw</topic>
+          <camera name="${camera_name}_ired2">
+            <optical_frame_id>${infrared2_optical_frame}</optical_frame_id>
+            <horizontal_fov>${2.0 * atan(infra_width / (2.0 * infra_fx))}</horizontal_fov>
+            <image>
+              <width>${infra_width}</width>
+              <height>${infra_height}</height>
+              <format>L_INT8</format>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+            <!-- <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.02</stddev>
+            </noise> -->
+            <xacro:if value="${USE_INTRINSIC}">
+              <lens>
+                <projection>
+                  <p_fx>${infra_fx}</p_fx>
+                  <p_fy>${infra_fy}</p_fy>
+                  <p_cx>${infra_cx}</p_cx>
+                  <p_cy>${infra_cy}</p_cy>
+                  <tx>${infra2_tx}</tx>
+                  <ty>0</ty>
+                </projection>
+                <intrinsics>
+                  <fx>${infra_fx}</fx>
+                  <fy>${infra_fy}</fy>
+                  <cx>${infra_cx}</cx>
+                  <cy>${infra_cy}</cy>
+                  <s>0</s>
+                </intrinsics>
+              </lens>
+            </xacro:if>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>${infra_fps}</update_rate>
+          <visualize>false</visualize>
+        </sensor>
+      </gazebo>
+    </xacro:if>
+
+    <xacro:if value="${align_depth}">
+
+      <!-- DEPTH CAMERA ALIGNED -->
+
+      <gazebo reference="${color_frame}">
+        <sensor name="${camera_name}_depth" type="custom" gz:type="Ros2DepthCamera">
+	          <topic>${camera_name}/aligned_depth_to_color/image_raw</topic>
+	          <gz_frame_id>${color_frame}</gz_frame_id>
+	          <publish_pointcloud>${PUBLISH_POINTCLOUD}</publish_pointcloud>
+	          <camera name="${camera_name}_aligned_depth_camera">
+            <camera_info_topic>${camera_name}/aligned_depth_to_color/camera_info</camera_info_topic>
+            <optical_frame_id>${color_optical_frame}</optical_frame_id>
+            <horizontal_fov>${2.0 * atan(color_width / (2.0 * color_fx))}</horizontal_fov>
+            <image>
+              <width>${color_width}</width>
+              <height>${color_height}</height>
+            </image>
+            <clip>
+              <near>${clip_distance_min}</near>
+              <xacro:unless value="${clip_distance > 0.0}">
+                <far>10</far>
+              </xacro:unless>
+              <xacro:if value="${clip_distance > 0.0}">
+                <far>${clip_distance}</far>
+              </xacro:if>
+            </clip>
+            <!-- <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise> -->
+            <xacro:if value="${USE_INTRINSIC}">
+              <lens>
+                <projection>
+                  <p_fx>${color_fx}</p_fx>
+                  <p_fy>${color_fy}</p_fy>
+                  <p_cx>${color_cx}</p_cx>
+                  <p_cy>${color_cy}</p_cy>
+                  <tx>0</tx>
+                  <ty>0</ty>
+                </projection>
+                <intrinsics>
+                  <fx>${color_fx}</fx>
+                  <fy>${color_fy}</fy>
+                  <cx>${color_cx}</cx>
+                  <cy>${color_cy}</cy>
+                  <s>0</s>
+                </intrinsics>
+              </lens>
+            </xacro:if>
           </camera>
           <always_on>1</always_on>
           <update_rate>${color_fps}</update_rate>
@@ -264,17 +280,19 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
       </gazebo>
     </xacro:if>
 
-    <!-- DEPTH CAMERA NOT ALIGNED -->
-
     <xacro:unless value="${align_depth}">
+
+      <!-- DEPTH CAMERA NOT ALIGNED -->
+
       <gazebo reference="${depth_frame}">
-        <sensor name="${camera_name}_depth" type="depth">
-          <topic>${camera_name}/depth/image_raw</topic>
-          <gz_frame_id>${depth_frame}</gz_frame_id>
-          <camera name="${camera_name}_depth_camera">
+        <sensor name="${camera_name}_depth" type="custom" gz:type="Ros2DepthCamera">
+	          <topic>${camera_name}/depth/image_raw</topic>
+	          <gz_frame_id>${depth_frame}</gz_frame_id>
+	          <publish_pointcloud>${PUBLISH_POINTCLOUD}</publish_pointcloud>
+	          <camera name="${camera_name}_depth_camera">
             <camera_info_topic>${camera_name}/depth/camera_info</camera_info_topic>
             <optical_frame_id>${depth_optical_frame}</optical_frame_id>
-            <horizontal_fov>${85.2*deg_to_rad}</horizontal_fov>
+            <horizontal_fov>${2.0 * atan(depth_width / (2.0 * depth_fx))}</horizontal_fov>
             <image>
               <width>${depth_width}</width>
               <height>${depth_height}</height>
@@ -291,25 +309,27 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
             <!-- <noise>
               <type>gaussian</type>
               <mean>0.0</mean>
-              <stddev>0.020</stddev>
+              <stddev>0.007</stddev>
             </noise> -->
-            <lens>
-              <projection>
-                <p_fx>${depth_fx}</p_fx>
-                <p_fy>${depth_fy}</p_fy>
-                <p_cx>${depth_cx}</p_cx>
-                <p_cy>${depth_cy}</p_cy>
-                <tx>0</tx>
-                <ty>0</ty>
-              </projection>
-              <intrinsics>
-                <fx>${depth_fx}</fx>
-                <fy>${depth_fy}</fy>
-                <cx>${depth_cx}</cx>
-                <cy>${depth_cy}</cy>
-                <s>0</s>
-              </intrinsics>
-            </lens>
+            <xacro:if value="${USE_INTRINSIC}">
+              <lens>
+                <projection>
+                  <p_fx>${depth_fx}</p_fx>
+                  <p_fy>${depth_fy}</p_fy>
+                  <p_cx>${depth_cx}</p_cx>
+                  <p_cy>${depth_cy}</p_cy>
+                  <tx>0</tx>
+                  <ty>0</ty>
+                </projection>
+                <intrinsics>
+                  <fx>${depth_fx}</fx>
+                  <fy>${depth_fy}</fy>
+                  <cx>${depth_cx}</cx>
+                  <cy>${depth_cy}</cy>
+                  <s>0</s>
+                </intrinsics>
+              </lens>
+            </xacro:if>
           </camera>
           <always_on>1</always_on>
           <update_rate>${depth_fps}</update_rate>
@@ -317,6 +337,9 @@ This is the Gazebo URDF model for the Intel RealSense D435 camera
         </sensor>
       </gazebo>
     </xacro:unless>
+
+    <!-- IMU -->
+
     <gazebo reference="${imu_frame}">
       <sensor name="${camera_name}_imu" type="imu">
           <always_on>true</always_on>

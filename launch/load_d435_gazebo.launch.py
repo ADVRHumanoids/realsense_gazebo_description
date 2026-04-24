@@ -40,7 +40,7 @@ def launch_setup(context, *args, **kwargs):
         xacro_file, 
         mappings={
             'use_nominal_extrinsics': 'true', 
-            'add_plug': 'true',
+            'add_plug': 'false',
             'use_mesh': 'true',
             'name': LaunchConfiguration("name").perform(context),
             'parent': LaunchConfiguration("parent").perform(context), 
@@ -51,6 +51,7 @@ def launch_setup(context, *args, **kwargs):
             'yaw': LaunchConfiguration("pose_yaw").perform(context), 
             'pitch': LaunchConfiguration("pose_pitch").perform(context),
             'align_depth': LaunchConfiguration("align_depth").perform(context),
+            'publish_pointcloud': LaunchConfiguration("publish_pointcloud").perform(context),
             'gazebo_urdf': LaunchConfiguration("gazebo_urdf").perform(context),
             'enable_infrared': LaunchConfiguration("enable_infrared").perform(context),
         },
@@ -85,7 +86,7 @@ def launch_setup(context, *args, **kwargs):
             FindPackageShare("ros_gz_sim"), "/launch/gz_sim.launch.py"
         ], ),
         launch_arguments={
-            "gz_args": f" -r -v 5 {LaunchConfiguration('world_file').perform(context)}",
+            "gz_args": f" -r -v 1 {LaunchConfiguration('world_file').perform(context)}",
         }.items(),
     )
 
@@ -207,8 +208,9 @@ def generate_launch_description():
 
 
     ############
-    # NOTE: Pointcloud are published always by Depth Camera plugin, but the 'publish_pointcloud'
-    #       argument controls whether the pointcloud topic is bridged to ROS2 or not
+    # NOTE: Pointcloud publishment can be toggled only with the custom plugin
+    #  (see sensors mounted on _d435.gazebo.xacro file). The standard gazebo plugin
+    #  always publish it, but the ROS2 bridge is not activated for this topic.
     ############
     declared_arguments.append(DeclareLaunchArgument("publish_pointcloud", default_value="false"))
     declared_arguments.append(DeclareLaunchArgument("align_depth", default_value="false"))

@@ -2,6 +2,15 @@
 
 `realsense_gazebo_description` provides URDF/Xacro descriptions and launch files for Intel RealSense D400-family cameras in ROS 2, with special support for visualization in ROS and spawning the camera in Gazebo Sim Harmonic.
 
+For Gazebo simulation, this package depends on the external custom sensor plugin repository:
+
+- `https://github.com/ADVRHumanoids/realsense_gazebo_plugin.git/`
+
+That repository provides the custom Gazebo depth sensor and system plugin referenced by the simulation xacro files.
+
+> [!IMPORTANT]
+> The custom Gazebo depth sensor is used to match the ROS 2 pointcloud axis convention. If you do not need that correction, the normal Gazebo sensor path can still be used. The custom path requires `realsense_gazebo_plugin` and the world must load the custom `Ros2CameraSystem` plugin.
+
 ## Repository Structure
 
 The package is organized around a few folders that external users will touch most often:
@@ -44,8 +53,8 @@ This package is an asset and launch package. Its job is to provide:
   - visualize the model in ROS 2, or
   - load the model into Gazebo Sim and bridge the sensor topics back to ROS 2.
 
-For simulation, it is meant to be used together with Gazebo/ROS-Gazebo integration packages such as `ros_gz_sim`, `ros_gz_bridge`, and `ros_gz_image`.<br>
-See [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/install/) and [Harmonic/ROS 2 Jazzy](https://gazebosim.org/docs/harmonic/ros_installation/) for the installation instructions.
+For simulation, it is meant to be used together with Gazebo/ROS-Gazebo integration packages such as `ros_gz_sim`, `ros_gz_bridge`, and `ros_gz_image`, plus `realsense_gazebo_plugin` for the custom depth sensor.<br>
+See [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/install/), [Harmonic/ROS 2 Jazzy](https://gazebosim.org/docs/harmonic/ros_installation/) and [realsense_gazebo_plugin](https://github.com/ADVRHumanoids/realsense_gazebo_plugin.git/) for the installation instructions.
 
 ## How the Xacro Files Are Organized
 
@@ -61,7 +70,7 @@ flowchart TD
     B --> C["_materials.urdf.xacro"]
     B --> D["_usb_plug.urdf.xacro"]
     B --> E["camera gazebo macro<br/>_d435.gazebo.xacro or _d435i.gazebo.xacro"]
-    A --> F["user arguments<br/>name, parent, pose, align_depth,<br/>gazebo_urdf, infra_enable, ..."]
+    A --> F["user arguments<br/>name, parent, pose, align_depth,<br/>gazebo_urdf, enable_infrared, ..."]
     F --> B
     E --> G["Gazebo sensor blocks<br/>RGB, depth, optional IR, IMU,<br/>point cloud, aligned depth"]
     B --> H["robot model<br/>links, joints, optical frames, meshes"]
@@ -79,10 +88,24 @@ These are the files external users will normally reference first:
 
 Each standalone file:
 
-- declares user-facing arguments such as camera name, parent frame, pose, depth alignment, and Gazebo enablement,
+- declares user-facing arguments such as camera name, parent frame, pose, depth alignment, Gazebo enablement, and infrared enablement,
 - includes the corresponding internal camera macro,
 - instantiates the camera under a parent link, usually `world`,
 - can optionally inject Gazebo sensor blocks when `gazebo_urdf:=true`.
+
+Both standalone entry points expose `custom_intrinsic:=true|false` and `use_intrinsic:=true|false`.
+
+- `custom_intrinsic:=false` keeps the preset resolution-based intrinsics from `_d435_gazebo_config.xacro`.
+- `custom_intrinsic:=true` uses the explicit `fx/fy/cx/cy` values passed by the user.
+- `use_intrinsic:=false` keeps the Gazebo sensor block minimal and does not emit `<lens>` / `<intrinsics>`.
+- `use_intrinsic:=true` writes the selected intrinsic values into the Gazebo sensor XML.
+
+By default the custom intrinsic path is not used.
+
+The resolved intrinsics come from the resolution tables in `_d435_gazebo_config.xacro`. Those values were collected from real RealSense calibration data and then mapped to the supported image resolutions used in simulation.
+
+> [!CAUTION]
+> These intrinsics were used for simulation tests, but the resulting pointcloud did not match the robot description and the surrounding world object positions closely enough for the default setup. For that reason pointcloud publication and aligned depth are disabled by default, and they must be enabled explicitly if you need them.
 
 For example, [d435i_standalone.urdf.xacro](/home/user/xbot2_ws/src/realsense_gazebo_description/urdf/d435i_standalone.urdf.xacro:1) is the main entry point used by the D435i launch files.
 
@@ -103,7 +126,7 @@ They contain:
 - the hook that includes Gazebo sensor definitions when requested.
 
 These files are the exact replica of the one present in the [realsense2_description package](https://github.com/realsenseai/realsense-ros/tree/ros2-master/realsense2_description) created by Realsense.<br>
-Additionally, they include the gazebo sensors macro when `gazebo_urdf:=true`. For instance, [_d435i.urdf.xacro](/home/user/xbot2_ws/src/realsense_gazebo_description/urdf/_d435i.urdf.xacro:1) defines the `sensor_d435i` macro and conditionally includes Gazebo simulation blocks through `_d435i.gazebo.xacro`.
+Additionally, they include the gazebo sensors macro when `gazebo_urdf:=true`. For instance, [_d435i.urdf.xacro](/home/user/xbot2_ws/src/realsense_gazebo_description/urdf/_d435i.urdf.xacro:1) defines the `sensor_d435i` macro, resolves D435i Gazebo intrinsics through `_d435_gazebo_config.xacro`, and conditionally includes Gazebo simulation blocks through `_d435i.gazebo.xacro`.
 
 ### Gazebo-specific macros
 
@@ -126,6 +149,25 @@ These Gazebo blocks are only added when the standalone or internal macro is call
 gazebo_urdf:=true
 ```
 
+### Depth alignment model
+
+Depth alignment is controlled entirely in the Gazebo Xacro layer, not by a separate ROS post-processing node.
+
+When `align_depth:=false`:
+
+- the custom depth sensor is attached to `depth_frame`,
+- the topic is published as `depth/image_raw`,
+- the sensor uses the depth camera frame, depth intrinsics, and depth optical frame.
+
+When `align_depth:=true`:
+
+- the custom depth sensor is attached to `color_frame`,
+- the topic is published as `aligned_depth_to_color/image_raw`,
+- the sensor uses the color camera frame, color intrinsics, and color optical frame,
+- the reported camera info topic becomes `aligned_depth_to_color/camera_info`.
+
+In both cases the actual rendered depth stream still comes from the custom `Ros2DepthCamera` implementation. The difference is the reference frame and intrinsics used for the rendered depth image.
+
 ### Shared support files
 
 The following files are reused by the camera macros:
@@ -145,7 +187,7 @@ The package provides two categories of launch files.
 - `launch/view_model.launch.py`
 
 Use these when you want to inspect the model in ROS 2 without simulation.
-`view_model.launch.py` is the generic version of the viewer: instead of being tied to `D435` or `D435i`, it accepts a `model` argument and loads any xacro file available in the package `urdf/` folder.
+`view_model.launch.py` is the generic version of the viewer: instead of being tied to `D435` or `D435i`, it accepts a `model` argument and loads a xacro file from the package `urdf/` folder. In practice, it is best used with the standalone entry points such as `d435_standalone.urdf.xacro` and `d435i_standalone.urdf.xacro`, not the internal `_*.xacro` helper files.
 
 What they do:
 
@@ -153,6 +195,12 @@ What they do:
 - run `robot_state_publisher`,
 - optionally open RViz,
 - optionally publish a static transform from `world` to the camera base frame.
+
+`view_model.launch.py` is a small special case:
+
+- it reads `model:=...` directly from `sys.argv` instead of declaring standard ROS launch arguments,
+- it always starts RViz,
+- it always starts `robot_state_publisher`.
 
 What they do **not** do:
 
@@ -177,8 +225,13 @@ What they do:
 - support options such as:
   - `align_depth`
   - `publish_pointcloud`
-  - `infra_enable`
+  - `enable_infrared`
   - pose and naming arguments
+
+The simulation launchers use both Gazebo bridge stacks:
+
+- `ros_gz_image` for the RGB image topic,
+- `ros_gz_bridge` for camera info, depth, point cloud, infrared, and IMU topics.
 
 
 ## Launch Arguments
@@ -217,6 +270,12 @@ The package exposes two main launch patterns: ROS-only view launchers and Gazebo
 - `model`
   Required command-line parameter. It must match one file name present in `urdf/`.
 
+Notes:
+
+- the file is selected by name, so internal helper xacros may appear in the accepted list even though they are not useful entry points,
+- RViz and `robot_state_publisher` are always launched by this file,
+- the recommended values for `model` are `d435_standalone.urdf.xacro` and `d435i_standalone.urdf.xacro`.
+
 Example:
 
 ```bash
@@ -252,13 +311,22 @@ ros2 launch realsense_gazebo_description view_model.launch.py model:=d435i_stand
 - `world_file` default: `worlds/empty.sdf`
   Gazebo world loaded by `ros_gz_sim`.
 - `publish_pointcloud` default: `false`
-  Enables bridging the point cloud topic from Gazebo to ROS 2.
+  Enables pointcloud publication in the custom Gazebo depth sensor path. When `false`, the `/points` topic is not created and there is nothing to bridge to ROS 2.
 - `align_depth` default: `false`
   Switches depth output to aligned-depth-to-color topics.
 - `gazebo_urdf` default: `true`
   Includes Gazebo sensor blocks in the expanded xacro/URDF.
-- `infra_enable` default: `false`
+- `enable_infrared` default: `false`
   Enables infrared sensors and the related ROS-Gazebo bridges.
+
+The D435 and D435i standalone xacros also support:
+
+- `custom_intrinsic` default: `false`
+  When `false`, the Gazebo intrinsics are derived from the selected image resolutions through `_d435_gazebo_config.xacro`. When `true`, the supplied intrinsic values are used directly.
+- `use_intrinsic` default: `false`
+  When `true`, the chosen intrinsic values are written into the Gazebo sensor XML. When `false`, the sensor block uses the minimal camera configuration (default).
+
+By default `publish_pointcloud:=false` and `align_depth:=false`. That matches the safer simulation setup used in this workspace.
 
 ## Typical Usage
 
@@ -274,7 +342,7 @@ ros2 launch realsense_gazebo_description view_d435i.launch.py rviz:=true
 ros2 launch realsense_gazebo_description view_d435.launch.py rviz:=true
 ```
 
-### Visualize any available model with the generic viewer
+### Visualize a standalone model with the generic viewer
 
 ```bash
 ros2 launch realsense_gazebo_description view_model.launch.py model:=d435i_standalone.urdf.xacro
@@ -312,12 +380,11 @@ The launch files expose a similar set of arguments. The most important ones are:
 - `robot_state_publisher`: start `robot_state_publisher`
 - `world_file`: Gazebo world to load in simulation launch files
 - `align_depth`: publish depth aligned to the color camera
-- `publish_pointcloud`: bridge the point cloud topic to ROS 2
-- `infra_enable`: enable infrared camera topics in simulation
+- `publish_pointcloud`: enable pointcloud publication in the custom depth sensor path
+- `enable_infrared`: enable infrared camera topics in simulation
 - `gazebo_urdf`: include Gazebo sensor blocks in the URDF/Xacro expansion
-
->**NOTE:**
-> `publish_pointcloud` only removes the bridge from Gazebo to ROS 2 of the topic. In Gazebo the topic is always published.
+- `custom_intrinsic`: bypass resolution-based intrinsic selection and use explicit intrinsic values
+- `use_intrinsic`: write the selected intrinsic values into the Gazebo sensor XML
 
 ## External Usage Notes
 
@@ -334,16 +401,23 @@ If you want to reuse the model in another robot description, the most common pat
 - keep `gazebo_urdf:=false` for pure URDF/TF usage,
 - set `gazebo_urdf:=true` when the model must carry Gazebo sensor definitions for simulation.
 
+For the sensor implementation details, pointcloud handling, and system-plugin behavior, see the companion package README in `realsense_gazebo_plugin`.
+
 >**NOTE:**
-> The topic from the simulation are bridged to ROS 2 frfom Gazebo Harmonic via the proper bridge.
-> See the launch file to understand how to do it.
+> In simulation, RGB images are bridged with `ros_gz_image`, while camera info, depth, point clouds, infrared, and IMU topics are bridged with `ros_gz_bridge`.
 
 ## Dependencies
 
-At runtime, this package expects the usual ROS 2 description tooling plus Gazebo integration packages when simulation launch files are used:
+At runtime, this package expects the usual ROS 2 description tooling, visualization nodes, and Gazebo integration packages when simulation launch files are used:
 
 - `xacro`
+- `rviz2`
+- `robot_state_publisher`
+- `tf2_ros`
+- `ros_gz_sim`
+- `ros_gz_bridge`
+- `ros_gz_image`
+- `realsense_gazebo_plugin`
 - Gazebo Harmonic
 - ROS 2 Jazzy
-- realsense2_camera_msgs
-
+- `realsense2_camera_msgs`

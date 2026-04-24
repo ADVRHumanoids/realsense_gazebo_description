@@ -12,23 +12,39 @@
     <xacro:arg name="pitch" default="0"/>
     <xacro:arg name="yaw" default="0"/>
     
-    <xacro:arg name="align_depth" default="false"/>
-    <xacro:arg name="custom_intrinsic" default="false"/>
+	<xacro:arg name="align_depth" default="false"/>
+	<xacro:arg name="publish_pointcloud" default="false"/>
+
+	<!-- NOTE: 
+		use_intrinsic: set to true when you want to assign the default 
+					   intrinsic based on the value in "_d435_gazebo_config.xacro" 
+
+		cutom_intrinsic: Requires [use_intrinsic]. Instead of using the default intrinsics,
+						 it loads the ones passed via argument to the macro.
+						 Requires the addition of all the parameters (not present in this example).
+	-->
+	<xacro:arg name="custom_intrinsic" default="false"/>
+	<xacro:arg name="use_intrinsic" default="false"/> 
 
     <xacro:arg name="use_nominal_extrinsics" default="false"/>
     <xacro:arg name="add_plug" default="false" />
     <xacro:arg name="use_mesh" default="true" />
     <xacro:arg name="gazebo_urdf" default="false" />
     <xacro:arg name="enable_infrared" default="false"/>
-    
+
 	<xacro:include filename="$(find realsense_gazebo_description)/urdf/_d435.urdf.xacro"/>
 	
  	<link name="$(arg parent)"/>
 	<xacro:sensor_d435 parent="$(arg parent)" name="$(arg name)"
-        use_nominal_extrinsics="$(arg use_nominal_extrinsics)" add_plug="$(arg add_plug)"
-        use_mesh="$(arg use_mesh)" gazebo_urdf="$(arg gazebo_urdf)"
-        enable_infrared="$(arg enable_infrared)" align_depth="$(arg align_depth)"
-        custom_intrinsic="$(arg custom_intrinsic)">
+        use_nominal_extrinsics="$(arg use_nominal_extrinsics)"
+		add_plug="$(arg add_plug)"
+	    use_mesh="$(arg use_mesh)"
+		gazebo_urdf="$(arg gazebo_urdf)"
+	    enable_infrared="$(arg enable_infrared)"
+		align_depth="$(arg align_depth)"
+	    publish_pointcloud="$(arg publish_pointcloud)"
+		custom_intrinsic="$(arg custom_intrinsic)"
+		use_intrinsic="$(arg use_intrinsic)">
 		<origin xyz="$(arg x) $(arg y) $(arg z)" rpy="$(arg roll) $(arg pitch) $(arg yaw)"/>
 	</xacro:sensor_d435>
 	

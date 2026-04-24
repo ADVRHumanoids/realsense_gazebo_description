@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 3.5)
 project(realsense_gazebo_description)
 
 find_package(ament_cmake REQUIRED)
+find_package(realsense_gazebo_plugin)
 
 # Install files
 install(DIRECTORY 

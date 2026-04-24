@@ -32,6 +32,11 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
+    <plugin
+      filename="Ros2CameraSystem"
+      name="custom::Ros2CameraSystem">
+    </plugin>
+
     <!-- Ground Plane -->
     <model name='ground_plane'>
       <static>true</static>

@@ -36,6 +36,8 @@ aluminum peripherial evaluation case.
                                           align_depth:=false
                                           gazebo_urdf:=false
                                           custom_intrinsic:=false
+                                          use_intrinsic:=false
+	                                        publish_pointcloud:=false
 
                                           clip_distance:=-1.0
                                           clip_distance_min:=0.195
@@ -60,11 +62,11 @@ aluminum peripherial evaluation case.
                                           color_width:=640
                                           color_height:=480
                                           color_fps:=30
-                                          color_fx:= 606.4806518554688
-                                          color_fy:= 606.4366455078125
-                                          color_cx:= 326.2506103515625
-                                          color_cy:= 254.5507049560547
-                                          visualize:=false
+	                                        color_fx:= 606.4806518554688
+	                                        color_fy:= 606.4366455078125
+	                                        color_cx:= 326.2506103515625
+	                                        color_cy:= 254.5507049560547
+	                                        visualize:=false
                                           *origin">
 
     <xacro:property name="M_PI" value="3.1415926535897931" />
@@ -278,10 +280,12 @@ aluminum peripherial evaluation case.
                        infra_cy="${resolved_infra_cy}"
                        infra2_tx="${resolved_infra2_tx}"
 
-                       clip_distance="${clip_distance}"
-                       clip_distance_min="${resolved_clip_distance_min}"
-                       align_depth="${align_depth}"
-                       visualize="${visualize}"
+	                     clip_distance="${clip_distance}"
+	                     clip_distance_min="${resolved_clip_distance_min}"
+	                     align_depth="${align_depth}"
+	                     publish_pointcloud="${publish_pointcloud}"
+                       use_intrinsic="${use_intrinsic}"
+	                     visualize="${visualize}"
       />
     </xacro:if>
  
