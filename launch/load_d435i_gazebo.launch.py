@@ -188,7 +188,7 @@ def generate_launch_description():
     declared_arguments = []
 
     declared_arguments.append(DeclareLaunchArgument("name", default_value="D435i_camera"))
-    declared_arguments.append(DeclareLaunchArgument("parent", default_value="world"))
+    declared_arguments.append(DeclareLaunchArgument("parent", default_value="base_link"))
     declared_arguments.append(DeclareLaunchArgument("use_sim_time", default_value="true"))
     declared_arguments.append(DeclareLaunchArgument("rviz", default_value="false"))
     declared_arguments.append(DeclareLaunchArgument("robot_state_publisher", default_value="true"))
