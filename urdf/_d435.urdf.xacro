@@ -34,6 +34,7 @@ aluminum peripherial evaluation case.
                                           add_plug:=false 
                                           use_mesh:=true
                                           align_depth:=false
+                                          publish_tf:=true
                                           gazebo_urdf:=false
                                           custom_intrinsic:=false
                                           use_intrinsic:=false
@@ -70,6 +71,7 @@ aluminum peripherial evaluation case.
                                           *origin">
 
     <xacro:property name="M_PI" value="3.1415926535897931" />
+    <xacro:property name="PUBLISH_TF" value="${publish_tf}" /> <!-- set false to not publish TF frames for the camera -->
     <xacro:property name= "GAZEBO_URDF" value="${gazebo_urdf}" /> <!-- set true to load gazebo plugins -->
     <xacro:property name="INFRARED" value="${enable_infrared}" /> <!-- Set true to enable infrared sensors-->
 
@@ -132,161 +134,166 @@ aluminum peripherial evaluation case.
     </joint>
     <link name="${name}_bottom_screw_frame"/>
 
-    <joint name="${name}_link_joint" type="fixed">
-      <origin xyz="${d435_mesh_x_offset} ${d435_cam_depth_py} ${d435_cam_depth_pz}" rpy="0 0 0"/>
-      <parent link="${name}_bottom_screw_frame"/>
-      <child link="${name}_link" />
-    </joint>
+    <xacro:if value="${PUBLISH_TF}">
+      
+      <!-- Publish TF from bottom screw frame -->
+      <joint name="${name}_link_joint" type="fixed">
+        <origin xyz="${d435_mesh_x_offset} ${d435_cam_depth_py} ${d435_cam_depth_pz}" rpy="0 0 0"/>
+        <parent link="${name}_bottom_screw_frame"/>
+        <child link="${name}_link" />
+      </joint>
 
-    <link name="${name}_link">
-      <visual>
-        <xacro:if value="${use_mesh}">
-          <!-- the mesh origin is at front plate in between the two infrared camera axes -->
-          <!-- <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/> -->
-          <!-- NOTE: a custom mesh is applied for the visual and the origin is not the same as the camera link -->
-          <origin xyz="${-d435_cam_depth_py - 0.003} ${-d435_cam_depth_py} 0" rpy="0 0 ${M_PI/2}"/>
+      <link name="${name}_link">
+        <visual>
+          <xacro:if value="${use_mesh}">
+            <!-- the mesh origin is at front plate in between the two infrared camera axes -->
+            <!-- <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/> -->
+            <!-- NOTE: a custom mesh is applied for the visual and the origin is not the same as the camera link -->
+            <origin xyz="${-d435_cam_depth_py - 0.003} ${-d435_cam_depth_py} 0" rpy="0 0 ${M_PI/2}"/>
+            <geometry>
+              <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435.dae" />
+            </geometry>
+          </xacro:if>
+          <xacro:unless value="${use_mesh}">
+            <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+            <geometry>
+              <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435_simplified.stl" />
+            </geometry>
+            <material name="aluminum"/>
+          </xacro:unless>     
+        </visual>
+        <collision>
+          <origin xyz="${-d435_cam_depth/2 + d435_zero_depth_to_glass} ${-d435_cam_depth_py} 0" rpy="0 0 0"/>
           <geometry>
-            <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435.dae" />
+            <box size="${d435_cam_depth} ${d435_cam_width} ${d435_cam_height}"/>
           </geometry>
+        </collision>
+        <inertial>
+          <mass value="0.075" />
+          <origin xyz="-0.0087 -0.01725  -0.00006" />
+          <inertia ixx="0.00005" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00005" />
+        </inertial>
+      </link>
+
+      <!-- Use the nominal extrinsics between camera frames if the calibrated extrinsics aren't being published. e.g. running the device in simulation  -->
+      <xacro:if value="${use_nominal_extrinsics}">
+        <!-- camera depth joints and links -->
+        <joint name="${name}_depth_joint" type="fixed">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <parent link="${name}_link"/>
+          <child link="${name}_depth_frame" />
+        </joint>
+        <link name="${name}_depth_frame"/>
+
+        <joint name="${name}_depth_optical_joint" type="fixed">
+          <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+          <parent link="${name}_depth_frame" />
+          <child link="${name}_depth_optical_frame" />
+        </joint>
+        <link name="${name}_depth_optical_frame"/>
+
+        <!-- camera left IR joints and links -->
+        <xacro:if value="${INFRARED}">
+          <joint name="${name}_infra1_joint" type="fixed">
+            <origin xyz="0 ${d435_cam_depth_to_infra1_offset} 0" rpy="0 0 0" />
+            <parent link="${name}_link" />
+            <child link="${name}_infra1_frame" />
+          </joint>
+          <link name="${name}_infra1_frame"/>
+
+          <joint name="${name}_infra1_optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+            <parent link="${name}_infra1_frame" />
+            <child link="${name}_infra1_optical_frame" />
+          </joint>
+          <link name="${name}_infra1_optical_frame"/>
+
+          <!-- camera right IR joints and links -->
+          <joint name="${name}_infra2_joint" type="fixed">
+            <origin xyz="0 ${d435_cam_depth_to_infra2_offset} 0" rpy="0 0 0" />
+            <parent link="${name}_link" />
+            <child link="${name}_infra2_frame" />
+          </joint>
+          <link name="${name}_infra2_frame"/>
+
+          <joint name="${name}_infra2_optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+            <parent link="${name}_infra2_frame" />
+            <child link="${name}_infra2_optical_frame" />
+          </joint>
+          <link name="${name}_infra2_optical_frame"/>
         </xacro:if>
-        <xacro:unless value="${use_mesh}">
-          <origin xyz="${d435_zero_depth_to_glass + d435_glass_to_front} ${-d435_cam_depth_py} 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
-          <geometry>
-            <mesh filename="file://$(find realsense_gazebo_description)/meshes/d435_simplified.stl" />
-          </geometry>
-          <material name="aluminum"/>
-        </xacro:unless>     
-      </visual>
-      <collision>
-        <origin xyz="${-d435_cam_depth/2 + d435_zero_depth_to_glass} ${-d435_cam_depth_py} 0" rpy="0 0 0"/>
-        <geometry>
-          <box size="${d435_cam_depth} ${d435_cam_width} ${d435_cam_height}"/>
-        </geometry>
-      </collision>
-      <inertial>
-        <mass value="0.075" />
-        <origin xyz="-0.0087 -0.01725  -0.00006" />
-        <inertia ixx="0.00005" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00005" />
-      </inertial>
-    </link>
 
-    <!-- Use the nominal extrinsics between camera frames if the calibrated extrinsics aren't being published. e.g. running the device in simulation  -->
-    <xacro:if value="${use_nominal_extrinsics}">
-      <!-- camera depth joints and links -->
-      <joint name="${name}_depth_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <parent link="${name}_link"/>
-        <child link="${name}_depth_frame" />
-      </joint>
-      <link name="${name}_depth_frame"/>
-
-      <joint name="${name}_depth_optical_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
-        <parent link="${name}_depth_frame" />
-        <child link="${name}_depth_optical_frame" />
-      </joint>
-      <link name="${name}_depth_optical_frame"/>
-
-      <!-- camera left IR joints and links -->
-      <xacro:if value="${INFRARED}">
-        <joint name="${name}_infra1_joint" type="fixed">
-          <origin xyz="0 ${d435_cam_depth_to_infra1_offset} 0" rpy="0 0 0" />
+        <!-- camera color joints and links -->
+        <joint name="${name}_color_joint" type="fixed">
+          <origin xyz="0 ${d435_cam_depth_to_color_offset} 0" rpy="0 0 0" />
           <parent link="${name}_link" />
-          <child link="${name}_infra1_frame" />
+          <child link="${name}_color_frame" />
         </joint>
-        <link name="${name}_infra1_frame"/>
+        <link name="${name}_color_frame"/>
 
-        <joint name="${name}_infra1_optical_joint" type="fixed">
+        <joint name="${name}_color_optical_joint" type="fixed">
           <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
-          <parent link="${name}_infra1_frame" />
-          <child link="${name}_infra1_optical_frame" />
+          <parent link="${name}_color_frame" />
+          <child link="${name}_color_optical_frame" />
         </joint>
-        <link name="${name}_infra1_optical_frame"/>
-
-        <!-- camera right IR joints and links -->
-        <joint name="${name}_infra2_joint" type="fixed">
-          <origin xyz="0 ${d435_cam_depth_to_infra2_offset} 0" rpy="0 0 0" />
-          <parent link="${name}_link" />
-          <child link="${name}_infra2_frame" />
-        </joint>
-        <link name="${name}_infra2_frame"/>
-
-        <joint name="${name}_infra2_optical_joint" type="fixed">
-          <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
-          <parent link="${name}_infra2_frame" />
-          <child link="${name}_infra2_optical_frame" />
-        </joint>
-        <link name="${name}_infra2_optical_frame"/>
+        <link name="${name}_color_optical_frame"/>
       </xacro:if>
 
-      <!-- camera color joints and links -->
-      <joint name="${name}_color_joint" type="fixed">
-        <origin xyz="0 ${d435_cam_depth_to_color_offset} 0" rpy="0 0 0" />
-        <parent link="${name}_link" />
-        <child link="${name}_color_frame" />
-      </joint>
-      <link name="${name}_color_frame"/>
+      <xacro:if value="${add_plug}">
+        <xacro:usb_plug parent="${name}_link" name="${name}_usb_plug">
+          <origin xyz="${d435_cam_mount_from_center_offset - 0.031} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
+        </xacro:usb_plug>
+      </xacro:if>
 
-      <joint name="${name}_color_optical_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
-        <parent link="${name}_color_frame" />
-        <child link="${name}_color_optical_frame" />
-      </joint>
-      <link name="${name}_color_optical_frame"/>
-    </xacro:if>
+      <xacro:if value="${GAZEBO_URDF}">
+        <!-- Realsense Gazebo Plugin -->
+        <!-- Resolved intrinsic parameters are evaluated in '_d435_gazebo_config.xacro' file -->
+        <xacro:gazebo_d435 camera_name="${name}"
+                        color_frame="${name}_color_frame"
+                        depth_frame="${name}_depth_frame"
+                        infrared1_frame="${name}_infra1_frame"
+                        infrared2_frame="${name}_infra2_frame"
 
-    <xacro:if value="${add_plug}">
-      <xacro:usb_plug parent="${name}_link" name="${name}_usb_plug">
-        <origin xyz="${d435_cam_mount_from_center_offset - 0.031} ${-d435_cam_depth_py - 0.0353} 0" rpy="0 0 0"/>
-      </xacro:usb_plug>
-    </xacro:if>
+                        depth_optical_frame="${name}_depth_optical_frame" 
+                        depth_width="${resolved_depth_width}"
+                        depth_height="${resolved_depth_height}"
+                        depth_fps="${resolved_depth_fps}"
+                        depth_fx="${resolved_depth_fx}"
+                        depth_fy="${resolved_depth_fy}"
+                        depth_cx="${resolved_depth_cx}"
+                        depth_cy="${resolved_depth_cy}"
 
-    <xacro:if value="${GAZEBO_URDF}">
-      <!-- Realsense Gazebo Plugin -->
-      <!-- Resolved intrinsic parameters are evaluated in '_d435_gazebo_config.xacro' file -->
-      <xacro:gazebo_d435 camera_name="${name}"
-                       color_frame="${name}_color_frame"
-                       depth_frame="${name}_depth_frame"
-                       infrared1_frame="${name}_infra1_frame"
-                       infrared2_frame="${name}_infra2_frame"
+                        color_optical_frame="${name}_color_optical_frame"
+                        color_width="${resolved_color_width}"
+                        color_height="${resolved_color_height}"
+                        color_fps="${resolved_color_fps}"
+                        color_fx="${resolved_color_fx}"
+                        color_fy="${resolved_color_fy}"
+                        color_cx="${resolved_color_cx}"
+                        color_cy="${resolved_color_cy}"
 
-                       depth_optical_frame="${name}_depth_optical_frame" 
-                       depth_width="${resolved_depth_width}"
-                       depth_height="${resolved_depth_height}"
-                       depth_fps="${resolved_depth_fps}"
-                       depth_fx="${resolved_depth_fx}"
-                       depth_fy="${resolved_depth_fy}"
-                       depth_cx="${resolved_depth_cx}"
-                       depth_cy="${resolved_depth_cy}"
+                        infrared1_optical_frame="${name}_infra1_optical_frame" 
+                        infrared2_optical_frame="${name}_infra2_optical_frame"
+                        enable_infrared="${enable_infrared}"
+                        infra_width="${resolved_infra_width}"
+                        infra_height="${resolved_infra_height}"
+                        infra_fps="${resolved_infra_fps}"
+                        infra_fx="${resolved_infra_fx}"
+                        infra_fy="${resolved_infra_fy}"
+                        infra_cx="${resolved_infra_cx}"
+                        infra_cy="${resolved_infra_cy}"
+                        infra2_tx="${resolved_infra2_tx}"
 
-                       color_optical_frame="${name}_color_optical_frame"
-                       color_width="${resolved_color_width}"
-                       color_height="${resolved_color_height}"
-                       color_fps="${resolved_color_fps}"
-                       color_fx="${resolved_color_fx}"
-                       color_fy="${resolved_color_fy}"
-                       color_cx="${resolved_color_cx}"
-                       color_cy="${resolved_color_cy}"
-
-                       infrared1_optical_frame="${name}_infra1_optical_frame" 
-                       infrared2_optical_frame="${name}_infra2_optical_frame"
-                       enable_infrared="${enable_infrared}"
-                       infra_width="${resolved_infra_width}"
-                       infra_height="${resolved_infra_height}"
-                       infra_fps="${resolved_infra_fps}"
-                       infra_fx="${resolved_infra_fx}"
-                       infra_fy="${resolved_infra_fy}"
-                       infra_cx="${resolved_infra_cx}"
-                       infra_cy="${resolved_infra_cy}"
-                       infra2_tx="${resolved_infra2_tx}"
-
-	                     clip_distance="${clip_distance}"
-	                     clip_distance_min="${resolved_clip_distance_min}"
-	                     align_depth="${align_depth}"
-	                     publish_pointcloud="${publish_pointcloud}"
-                       use_intrinsic="${use_intrinsic}"
-	                     visualize="${visualize}"
-      />
+                        clip_distance="${clip_distance}"
+                        clip_distance_min="${resolved_clip_distance_min}"
+                        align_depth="${align_depth}"
+                        publish_pointcloud="${publish_pointcloud}"
+                        use_intrinsic="${use_intrinsic}"
+                        visualize="${visualize}"
+        />
+      </xacro:if>
+    
     </xacro:if>
  
   </xacro:macro>
