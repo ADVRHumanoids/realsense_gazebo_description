@@ -11,6 +11,40 @@ That repository provides the custom Gazebo depth sensor and system plugin refere
 > [!IMPORTANT]
 > The custom Gazebo depth sensor is used to match the ROS 2 pointcloud axis convention. If you do not need that correction, the normal Gazebo sensor path can still be used. The custom path requires `realsense_gazebo_plugin` and the world must load the custom `Ros2CameraSystem` plugin.
 
+## Forest builds: simulation and hardware
+
+The `multidof_recipes` Forest recipe includes `realsense_gazebo_plugin` by
+default. For hardware use, enable the `rt` mode to keep the camera descriptions
+without requesting the Gazebo camera plugin:
+
+```bash
+# Simulation: include the Gazebo camera plugin.
+forest grow realsense_gazebo_description -j 4
+
+# Hardware: keep the descriptions, skip the Gazebo camera plugin.
+forest grow realsense_gazebo_description -j 4 --mode rt
+```
+
+The recipe implements this with:
+
+```yaml
+depends_if:
+  "not mode('rt')":
+    - realsense_gazebo_plugin
+```
+
+Forest modes apply throughout the dependency tree. You can therefore pass
+`--mode rt` to a parent recipe such as `concert_description` or `concert_all`
+instead of growing this package separately. The camera descriptions remain
+necessary for generating camera links and frames on hardware; use
+`gazebo_urdf:=false` when generating a model without simulated sensors.
+
+The `rt` mode currently skips this plugin only. It does not configure a
+real-time kernel, enable Xenomai, or select hardware at launch time. It does
+not uninstall an existing plugin or prevent other recipes from requesting it.
+This condition controls Forest dependency resolution; tools such as rosdep
+still follow the dependencies declared in `package.xml`.
+
 ## Repository Structure
 
 The package is organized around a few folders that external users will touch most often:
